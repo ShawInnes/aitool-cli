@@ -14,12 +14,10 @@ jobs:
         include:
           - os: macos-latest    # arm64 (M-series)
             target: darwin-arm64
-          - os: macos-13        # x64 (Intel)
-            target: darwin-x64
           - os: ubuntu-22.04
             target: linux-x64
-          - os: ubuntu-22.04-arm
-            target: linux-arm64
+#          - os: ubuntu-22.04-arm
+#            target: linux-arm64
           - os: windows-2022
             target: win-x64
 
