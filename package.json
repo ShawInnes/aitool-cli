@@ -3,8 +3,17 @@
   "module": "src/index.tsx",
   "type": "module",
   "private": true,
+  "bin": {
+    "aitool": "./dist/aitool-darwin-arm64"
+  },
   "scripts": {
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "build:darwin-arm64": "bun build --compile --target=bun-darwin-arm64 src/bootstrap.ts --outfile dist/aitool-darwin-arm64",
+    "build:darwin-x64": "bun build --compile --target=bun-darwin-x64   src/bootstrap.ts --outfile dist/aitool-darwin-x64",
+    "build:linux-x64": "bun build --compile --target=bun-linux-x64    src/bootstrap.ts --outfile dist/aitool-linux-x64",
+    "build:linux-arm64": "bun build --compile --target=bun-linux-arm64  src/bootstrap.ts --outfile dist/aitool-linux-arm64",
+    "build:win-x64": "bun build --compile --target=bun-windows-x64  src/bootstrap.ts --outfile dist/aitool-win-x64.exe",
+    "build:all": "bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:win-x64"
   },
   "devDependencies": {
     "@types/bun": "latest"

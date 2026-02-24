@@ -4,7 +4,9 @@
       "Bash(head:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "mcp__ide__getDiagnostics",
-      "Bash(bun add:*)"
+      "Bash(bun add:*)",
+      "Bash(bun:*)",
+      "Bash(chmod +x:*)"
     ]
   }
 }
