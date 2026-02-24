@@ -24,7 +24,13 @@ export async function setupNativeLib(nativeLibPath: string): Promise<void> {
 
   if (!existsSync(destPath)) {
     mkdirSync(destDir, { recursive: true });
-    const data = await Bun.file(nativeLibPath).arrayBuffer();
+    // Normalize to forward slashes — Bun.file() may not handle Windows
+    // backslash bunfs paths (e.g. B:\~BUN\root\...) reliably.
+    const normalizedPath = nativeLibPath.replace(/\\/g, '/');
+    const data = await Bun.file(normalizedPath).arrayBuffer();
+    if (data.byteLength === 0) {
+      throw new Error(`Native lib extraction returned empty buffer from: ${nativeLibPath}`);
+    }
     writeFileSync(destPath, Buffer.from(data));
   }
 
