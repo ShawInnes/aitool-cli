@@ -1,6 +1,7 @@
 import {chmodSync, mkdirSync, renameSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+// @ts-expect-error json import
 import pkg from '../package.json';
 const CURRENT_VERSION = pkg.version;
 
