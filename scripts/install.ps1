@@ -11,10 +11,10 @@ $InstallDir = if ($env:INSTALL_DIR) { $env:INSTALL_DIR } else { "$env:LOCALAPPDA
 
 # ── Platform detection ────────────────────────────────────────────────────────
 
-$Arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
+$Arch = $env:PROCESSOR_ARCHITECTURE
 $AssetName = switch ($Arch) {
-    'X64'   { 'aitool-win-x64.exe' }
-    'Arm64' { 'aitool-win-arm64.exe' }
+    'AMD64' { 'aitool-win-x64.exe' }
+    'ARM64' { 'aitool-win-arm64.exe' }
     default { throw "Unsupported architecture: $Arch" }
 }
 
