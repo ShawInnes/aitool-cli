@@ -12,8 +12,13 @@ import {
 } from './commands/setup.js';
 import {runConfigShow} from './commands/config.js';
 import {openBrowser, runAuthLogin, startDeviceAuth} from './commands/auth.js';
+import {formatRelativeTime, runAuthStatus} from './commands/authStatus.js';
+import {runAuthUserinfo} from './commands/authUserinfo.js';
+import {runAuthLogout} from './commands/authLogout.js';
 import SetupWizard from './components/SetupWizard.js';
 import AuthLogin from './components/AuthLogin.js';
+import AuthStatus from './components/AuthStatus.js';
+import AuthUserinfo from './components/AuthUserinfo.js';
 
 type GlobalOptions = {
 	configDir?: string;
@@ -80,7 +85,7 @@ program
 					process.exit(1);
 				}
 
-				console.log('Setup complete. Configuration saved.');
+				console.log(`Setup complete. Configuration saved to ${result.configFile}`);
 				console.log(`  issuer:   ${result.issuer}`);
 				console.log(`  clientId: ${result.clientId}`);
 			} else {
@@ -114,7 +119,81 @@ configCommand
 		}
 	});
 
-const authCommand = program.command('auth').description('Authenticate with the OIDC provider');
+const authCommand = program
+	.command('auth')
+	.description('Authenticate with the OIDC provider');
+
+authCommand
+	.command('status')
+	.description('Show current authentication status and token expiry')
+	.option('--output <format>', 'output format: text or json', 'text')
+	.action((options: {output: string}, command: Command) => {
+		const globalOptions = command.parent!.parent!.opts<GlobalOptions>();
+		const {configDir} = globalOptions;
+		const status = runAuthStatus(configDir);
+
+		if (options.output === 'json') {
+			console.log(JSON.stringify(status, null, 2));
+			return;
+		}
+
+		if (isTuiMode(globalOptions)) {
+			render(<AuthStatus status={status} />);
+			return;
+		}
+
+		const tokenLabel: Record<string, string> = {
+			valid: 'valid',
+			expiring_soon: 'expiring soon',
+			expired: 'expired',
+			unknown: 'unknown',
+		};
+
+		console.log(`configured:    ${status.configured}`);
+		console.log(`authenticated: ${status.authenticated}`);
+		if (status.issuer) console.log(`issuer:        ${status.issuer}`);
+		if (status.clientId) console.log(`clientId:      ${status.clientId}`);
+		if (status.scopes)
+			console.log(`scopes:        ${status.scopes.join(', ')}`);
+		console.log(
+			`token:         ${tokenLabel[status.tokenStatus] ?? status.tokenStatus}`,
+		);
+		if (status.expiresAt)
+			console.log(
+				`expiresAt:     ${status.expiresAt} (${formatRelativeTime(
+					status.expiresAt,
+				)})`,
+			);
+		if (status.scope) console.log(`scope:         ${status.scope}`);
+	});
+
+authCommand
+	.command('userinfo')
+	.description('Fetch user profile from the identity provider userinfo endpoint')
+	.action(async (_options, command: Command) => {
+		const globalOptions = command.parent!.parent!.opts<GlobalOptions>();
+		const {configDir} = globalOptions;
+
+		if (isTuiMode(globalOptions)) {
+			render(<AuthUserinfo configDir={configDir} />);
+		} else {
+			const info = await runAuthUserinfo(configDir);
+			console.log(JSON.stringify(info, null, 2));
+		}
+	});
+
+authCommand
+	.command('logout')
+	.description('Clear stored credentials')
+	.action((_options, command: Command) => {
+		const {configDir} = command.parent!.parent!.opts<GlobalOptions>();
+		const removed = runAuthLogout(configDir);
+		if (removed) {
+			console.log('Logged out. Credentials cleared.');
+		} else {
+			console.log('Not logged in.');
+		}
+	});
 
 authCommand
 	.command('login')

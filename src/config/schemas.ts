@@ -15,6 +15,7 @@ export const OidcDiscoverySchema = z.object({
 	authorization_endpoint: z.string().url(),
 	token_endpoint: z.string().url(),
 	device_authorization_endpoint: z.string().url(),
+	userinfo_endpoint: z.string().url().optional(),
 });
 
 export type OidcDiscovery = z.infer<typeof OidcDiscoverySchema>;
