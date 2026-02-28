@@ -106,7 +106,14 @@ program
 				console.log(`  issuer:   ${result.issuer}`);
 				console.log(`  clientId: ${result.clientId}`);
 			} else {
-				render(<SetupWizard configDir={configDir} forceReset={options.reset} />);
+				const {unmount, waitUntilExit} = render(
+					<SetupWizard
+						configDir={configDir}
+						forceReset={options.reset}
+						onComplete={() => unmount()}
+					/>,
+				);
+				await waitUntilExit();
 			}
 		},
 	);
@@ -160,6 +167,40 @@ const authCommand = program
 	.description('Authenticate with the OIDC provider');
 
 authCommand
+	.command('login')
+	.description('Authenticate via OIDC Device Authorization Grant')
+	.action(async (_options, command: Command) => {
+		const globalOptions = command.parent!.parent!.opts<GlobalOptions>();
+		const {configDir} = globalOptions;
+
+		if (isTuiMode(globalOptions)) {
+			render(<AuthLogin configDir={configDir} />);
+		} else {
+			const start = await startDeviceAuth(configDir);
+			openBrowser(start.verificationUriComplete ?? start.verificationUri);
+			console.log(`Open this URL in your browser: ${start.verificationUri}`);
+			console.log(`Enter code: ${start.userCode}`);
+			console.log('Waiting for authentication…');
+			const result = await runAuthLogin(configDir);
+			console.log('Authentication successful. Credentials saved.');
+			if (result.expiresAt) console.log(`  expires: ${result.expiresAt}`);
+		}
+	});
+
+authCommand
+	.command('logout')
+	.description('Clear stored credentials')
+	.action((_options, command: Command) => {
+		const {configDir} = command.parent!.parent!.opts<GlobalOptions>();
+		const removed = runAuthLogout(configDir);
+		if (removed) {
+			console.log('Logged out. Credentials cleared.');
+		} else {
+			console.log('Not logged in.');
+		}
+	});
+
+authCommand
 	.command('status')
 	.description('Show current authentication status and token expiry')
 	.option('--output <format>', 'output format: text or json', 'text')
@@ -204,7 +245,7 @@ authCommand
 	});
 
 authCommand
-	.command('userinfo')
+	.command('whoami')
 	.description(
 		'Fetch user profile from the identity provider userinfo endpoint',
 	)
@@ -217,40 +258,6 @@ authCommand
 		} else {
 			const info = await runAuthUserinfo(configDir);
 			console.log(JSON.stringify(info, null, 2));
-		}
-	});
-
-authCommand
-	.command('logout')
-	.description('Clear stored credentials')
-	.action((_options, command: Command) => {
-		const {configDir} = command.parent!.parent!.opts<GlobalOptions>();
-		const removed = runAuthLogout(configDir);
-		if (removed) {
-			console.log('Logged out. Credentials cleared.');
-		} else {
-			console.log('Not logged in.');
-		}
-	});
-
-authCommand
-	.command('login')
-	.description('Authenticate via OIDC Device Authorization Grant')
-	.action(async (_options, command: Command) => {
-		const globalOptions = command.parent!.parent!.opts<GlobalOptions>();
-		const {configDir} = globalOptions;
-
-		if (isTuiMode(globalOptions)) {
-			render(<AuthLogin configDir={configDir} />);
-		} else {
-			const start = await startDeviceAuth(configDir);
-			openBrowser(start.verificationUriComplete ?? start.verificationUri);
-			console.log(`Open this URL in your browser: ${start.verificationUri}`);
-			console.log(`Enter code: ${start.userCode}`);
-			console.log('Waiting for authentication…');
-			const result = await runAuthLogin(configDir);
-			console.log('Authentication successful. Credentials saved.');
-			if (result.expiresAt) console.log(`  expires: ${result.expiresAt}`);
 		}
 	});
 

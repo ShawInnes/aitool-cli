@@ -42,13 +42,18 @@ export default function SetupWizard({configDir, onComplete, forceReset}: Props) 
 		}
 	});
 
+	useEffect(() => {
+		if (step === 'success') {
+			onComplete?.();
+		}
+	}, [step, onComplete]);
+
 	async function runSetup(url: string) {
 		if (!url) return;
 		setStep('fetching');
 		try {
 			await runSetupCli(url, configDir);
 			setStep('success');
-			onComplete?.();
 		} catch (error) {
 			setErrorMessage(error instanceof Error ? error.message : String(error));
 			setStep('error');
@@ -93,7 +98,7 @@ export default function SetupWizard({configDir, onComplete, forceReset}: Props) 
 			<Box flexDirection="column" gap={1}>
 				<Text bold>aitool — First-Run Setup</Text>
 				<Text color="green">✓ Setup complete! Configuration saved.</Text>
-				<Text color="gray">Run `aitool login` to authenticate.</Text>
+				<Text color="gray">Run `aitool auth login` to authenticate.</Text>
 			</Box>
 		);
 	}
