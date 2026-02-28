@@ -24,6 +24,7 @@ import AuthUserinfo from './components/AuthUserinfo.js';
 type GlobalOptions = {
 	configDir?: string;
 	tui: boolean;
+	verbose: boolean;
 };
 
 function isTuiMode(globalOptions: GlobalOptions): boolean {
@@ -41,6 +42,7 @@ program
 		'--no-tui',
 		'non-interactive output (also auto-enabled when stdout is not a TTY)',
 	)
+	.option('--verbose', 'Debug output')
 	.action(() => {
 		program.help();
 	});
@@ -249,7 +251,11 @@ program.hook('preAction', (_thisCommand, actionCommand) => {
 		commandPath.unshift(cmd.name());
 		cmd = cmd.parent;
 	}
-	const configDir = cmd.opts<{configDir?: string}>().configDir;
+	const rootOpts = cmd.opts<{configDir?: string; verbose?: boolean}>();
+	if (rootOpts.verbose) {
+		process.env['AITOOL_VERBOSE'] = '1';
+	}
+	const configDir = rootOpts.configDir;
 	if (commandPath[0] === 'auth') return;
 	warnIfTokenExpiring(configDir);
 });

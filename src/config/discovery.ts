@@ -9,8 +9,16 @@ import {
 } from './schemas.js';
 import {writeConfig} from './store.js';
 
+function verbose(msg: string): void {
+	if (process.env['AITOOL_VERBOSE'] === '1') {
+		console.error(`[verbose] ${msg}`);
+	}
+}
+
 export async function fetchRemoteConfig(url: string): Promise<RemoteConfig> {
+	verbose(`GET ${url}`);
 	const response = await fetch(url);
+	verbose(`Response: ${response.status} ${response.statusText}`);
 	if (!response.ok) {
 		throw new Error(`Failed to fetch config (${response.status}): ${url}`);
 	}
@@ -32,7 +40,9 @@ export function loadRemoteConfigFromFile(filePath: string): RemoteConfig {
 }
 
 export async function fetchOidcDiscovery(discoveryUrl: string): Promise<OidcDiscovery> {
+	verbose(`GET ${discoveryUrl}`);
 	const response = await fetch(discoveryUrl);
+	verbose(`Response: ${response.status} ${response.statusText}`);
 	if (!response.ok) {
 		throw new Error(
 			`Failed to fetch OIDC discovery document (${response.status}): ${discoveryUrl}`,
@@ -59,9 +69,11 @@ export async function getDiscovery(
 	configDir?: string,
 ): Promise<OidcDiscovery> {
 	if (config.cachedDiscovery && !isDiscoveryCacheStale(config.discoveryFetchedAt)) {
+		verbose(`Cache hit: discovery document (fetched at ${config.discoveryFetchedAt})`);
 		return config.cachedDiscovery;
 	}
 
+	verbose('Cache miss: discovery document is stale or missing, re-fetching');
 	const discovery = await fetchOidcDiscovery(config.discoveryUrl);
 	writeConfig(
 		{
