@@ -10,7 +10,7 @@ import {
 	runSetupFromEnvironment,
 	runSetupFromFile,
 } from './commands/setup.js';
-import {runConfigShow} from './commands/config.js';
+import {runConfigGet, runConfigSet, runConfigShow} from './commands/config.js';
 import {openBrowser, runAuthLogin, startDeviceAuth} from './commands/auth.js';
 import {formatRelativeTime, runAuthStatus} from './commands/authStatus.js';
 import {runAuthUserinfo} from './commands/authUserinfo.js';
@@ -117,6 +117,22 @@ configCommand
 		if (config.discoveryFetchedAt) {
 			console.log(`discoveryFetchedAt:  ${config.discoveryFetchedAt}`);
 		}
+	});
+
+configCommand
+	.command('get <key>')
+	.description('Get a config value (clientId, scopes, discoveryUrl)')
+	.action(async (key: string, _options: unknown, command: Command) => {
+		const configDir = command.parent!.parent!.opts<GlobalOptions>().configDir;
+		await runConfigGet(key, configDir);
+	});
+
+configCommand
+	.command('set <key> <value>')
+	.description('Set a config value (clientId, scopes, discoveryUrl)')
+	.action(async (key: string, value: string, _options: unknown, command: Command) => {
+		const configDir = command.parent!.parent!.opts<GlobalOptions>().configDir;
+		await runConfigSet(key, value, configDir);
 	});
 
 const authCommand = program
