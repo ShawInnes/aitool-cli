@@ -5,7 +5,7 @@ import {
 	DeviceAuthResponseSchema,
 	TokenResponseSchema,
 } from '../config/schemas.js';
-import {readConfig, writeCredentials} from '../config/store.js';
+import {credentialsExist, readConfig, readCredentials, writeCredentials} from '../config/store.js';
 
 export type DeviceAuthStart = {
 	deviceCode: string;
@@ -137,4 +137,78 @@ export async function pollForToken(
 export async function runAuthLogin(configDir?: string): Promise<AuthLoginResult> {
 	const start = await startDeviceAuth(configDir);
 	return pollForToken(start, configDir);
+}
+
+export type TokenRefreshResult =
+	| {status: 'refreshed'}
+	| {status: 'not_needed'}
+	| {status: 'no_credentials'}
+	| {status: 'no_refresh_token'}
+	| {status: 'failed'; error: string};
+
+const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
+
+export async function runTokenRefresh(configDir?: string): Promise<TokenRefreshResult> {
+	if (!credentialsExist(configDir)) {
+		return {status: 'no_credentials'};
+	}
+
+	const credentials = readCredentials(configDir);
+
+	if (credentials.expiresAt) {
+		const expiresAtMs = new Date(credentials.expiresAt).getTime();
+		if (Date.now() < expiresAtMs - TOKEN_REFRESH_BUFFER_MS) {
+			return {status: 'not_needed'};
+		}
+	} else {
+		// No expiry information stored — assume refresh is not needed
+		return {status: 'not_needed'};
+	}
+
+	if (!credentials.refreshToken) {
+		return {status: 'no_refresh_token'};
+	}
+
+	const config = readConfig(configDir);
+	const discovery = await getDiscovery(config, configDir);
+
+	const body = new URLSearchParams({
+		grant_type: 'refresh_token',
+		refresh_token: credentials.refreshToken,
+		client_id: config.clientId,
+	});
+
+	let response: Response;
+	try {
+		response = await fetch(discovery.token_endpoint, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+			body: body.toString(),
+		});
+	} catch (err) {
+		return {status: 'failed', error: err instanceof Error ? err.message : String(err)};
+	}
+
+	if (!response.ok) {
+		const text = await response.text().catch(() => response.statusText);
+		return {status: 'failed', error: `Token refresh failed (${response.status}): ${text}`};
+	}
+
+	const data = TokenResponseSchema.parse((await response.json()) as unknown);
+	const expiresAt = data.expires_in
+		? new Date(Date.now() + data.expires_in * 1000).toISOString()
+		: undefined;
+
+	const updatedCredentials: Credentials = {
+		accessToken: data.access_token,
+		tokenType: data.token_type,
+		refreshToken: data.refresh_token ?? credentials.refreshToken,
+		idToken: data.id_token ?? credentials.idToken,
+		scope: data.scope ?? credentials.scope,
+		expiresAt,
+	};
+
+	writeCredentials(updatedCredentials, configDir);
+
+	return {status: 'refreshed'};
 }
