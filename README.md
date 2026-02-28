@@ -80,7 +80,11 @@ update (Windows does not allow overwriting a running executable).
 Running the install script again will always fetch and install the latest version:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ShawInnes/aitool-cli/main/install.sh | bash
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/ShawInnes/aitool-cli/main/scripts/install.sh | sh
+
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/ShawInnes/aitool-cli/main/scripts/install.ps1 | iex
 ```
 
 ## CLI
