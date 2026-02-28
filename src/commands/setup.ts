@@ -39,7 +39,7 @@ async function runSetup(
 	return {
 		issuer: discovery.issuer,
 		clientId: remoteConfig.clientId,
-		configFile: configFile,
+		configFile,
 	};
 }
 

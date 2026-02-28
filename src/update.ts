@@ -3,6 +3,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 // @ts-expect-error json import
 import pkg from '../package.json';
+
 const CURRENT_VERSION = pkg.version;
 
 const REPO = 'ShawInnes/aitool-cli';
@@ -53,12 +54,12 @@ function compareVersions(a: string, b: string): number {
 }
 
 async function fetchLatestVersion(): Promise<string> {
-	const res = await fetch(
+	const response = await fetch(
 		`https://api.github.com/repos/${REPO}/releases/latest`,
 		{headers: {'User-Agent': BINARY_NAME}},
 	);
-	if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
-	const data = (await res.json()) as {tag_name: string};
+	if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
+	const data = (await response.json()) as {tag_name: string};
 	return data.tag_name.replace(/^v/, '');
 }
 
@@ -67,16 +68,16 @@ async function verifyChecksum(
 	archiveName: string,
 	version: string,
 ): Promise<void> {
-	const res = await fetch(
+	const response = await fetch(
 		`https://github.com/${REPO}/releases/download/v${version}/checksums.txt`,
 		{headers: {'User-Agent': BINARY_NAME}},
 	);
-	if (!res.ok) {
+	if (!response.ok) {
 		console.warn('Warning: could not fetch checksums, skipping verification.');
 		return;
 	}
 
-	const text = await res.text();
+	const text = await response.text();
 	const line = text.split('\n').find(l => l.includes(archiveName));
 	const expected = line?.split(/\s+/)[0];
 	if (!expected) {
@@ -131,13 +132,13 @@ export async function selfUpdate(): Promise<void> {
 	const {archive, binary} = getPlatformAssets();
 	const url = `https://github.com/${REPO}/releases/download/v${latest}/${archive}`;
 
-	const res = await fetch(url, {headers: {'User-Agent': BINARY_NAME}});
-	if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+	const response = await fetch(url, {headers: {'User-Agent': BINARY_NAME}});
+	if (!response.ok) throw new Error(`Download failed: ${response.status}`);
 
-	const tmpDir = join(tmpdir(), `${BINARY_NAME}-update-${Date.now()}`);
-	const archivePath = join(tmpDir, archive);
-	mkdirSync(tmpDir, {recursive: true});
-	await Bun.write(archivePath, await res.arrayBuffer());
+	const temporaryDir = join(tmpdir(), `${BINARY_NAME}-update-${Date.now()}`);
+	const archivePath = join(temporaryDir, archive);
+	mkdirSync(temporaryDir, {recursive: true});
+	await Bun.write(archivePath, await response.arrayBuffer());
 
 	await verifyChecksum(archivePath, archive, latest);
 
@@ -147,9 +148,9 @@ export async function selfUpdate(): Promise<void> {
 			'powershell',
 			'-NoProfile',
 			'-Command',
-			`Expand-Archive -Path '${archivePath}' -DestinationPath '${tmpDir}' -Force`,
+			`Expand-Archive -Path '${archivePath}' -DestinationPath '${temporaryDir}' -Force`,
 		]);
-		const extractedExe = join(tmpDir, binary);
+		const extractedExe = join(temporaryDir, binary);
 		const dest = process.execPath.replace(/\.exe$/i, '') + '-new.exe';
 		renameSync(extractedExe, dest);
 		console.log(`\nDownloaded new binary to: ${dest}`);
@@ -161,8 +162,8 @@ export async function selfUpdate(): Promise<void> {
 	}
 
 	// Unix: extract tar.gz, then atomically rename over the running binary.
-	await spawnAndCheck(['tar', 'xzf', archivePath, '-C', tmpDir]);
-	const extractedBin = join(tmpDir, binary);
+	await spawnAndCheck(['tar', 'xzf', archivePath, '-C', temporaryDir]);
+	const extractedBin = join(temporaryDir, binary);
 	chmodSync(extractedBin, 0o755);
 	renameSync(extractedBin, process.execPath);
 

@@ -2,7 +2,7 @@
 	"name": "aitool-cli",
 	"version": "0.4.1",
 	"license": "MIT",
-	"bin": "src/cli.tsx",
+	"bin": "dist/cli.js",
 	"type": "module",
 	"engines": {
 		"node": ">=24"
@@ -20,7 +20,7 @@
 		"release": "npm version patch --message 'chore: release v%s'",
 		"release:minor": "npm version minor --message 'chore: release v%s'",
 		"release:major": "npm version major --message 'chore: release v%s'",
-		"test": "prettier --check src/ && xo && ava"
+		"test": "prettier --check src/ && xo src/ && ava"
 	},
 	"files": [
 		"dist"
@@ -65,7 +65,10 @@
 			"semicolon": true,
 			"rules": {
 				"react/prop-types": "off",
-				"n/prefer-global/process": "off"
+				"n/prefer-global/process": "off",
+				"@typescript-eslint/naming-convention": "off",
+				"unicorn/filename-case": "off",
+				"unicorn/no-process-exit": "off"
 			}
 		}
 	],

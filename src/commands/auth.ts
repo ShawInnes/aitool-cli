@@ -12,9 +12,9 @@ import {
 	writeCredentials,
 } from '../config/store.js';
 
-function verbose(msg: string): void {
+function verbose(message: string): void {
 	if (process.env['AITOOL_VERBOSE'] === '1') {
-		console.error(`[verbose] ${msg}`);
+		console.error(`[verbose] ${message}`);
 	}
 }
 
@@ -41,7 +41,7 @@ export function openBrowser(url: string): void {
 				? `open "${url}"`
 				: `xdg-open "${url}"`;
 	exec(cmd, () => {
-		/* fire and forget */
+		/* Fire and forget */
 	});
 }
 
@@ -118,20 +118,23 @@ export async function pollForToken(
 		const data = (await response.json()) as unknown;
 
 		if (!response.ok) {
-			const error = (data as {error?: string}).error;
+			const {error} = data as {error?: string};
 			if (error === 'authorization_pending') continue;
 			if (error === 'slow_down') {
 				pollInterval += 5;
 				continue;
 			}
+
 			if (error === 'expired_token') {
 				throw new Error(
 					'Device code expired. Please run `aitool auth login` again.',
 				);
 			}
+
 			if (error === 'access_denied') {
 				throw new Error('Access denied.');
 			}
+
 			throw new Error(`Token request failed: ${error ?? response.statusText}`);
 		}
 
@@ -166,7 +169,7 @@ export async function runAuthLogin(
 
 export type TokenRefreshResult = {status: 'refreshed'} | {status: 'not_needed'};
 
-const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
+const TOKEN_REFRESH_BUFFER_MS = 30 * 60 * 1000; // 30 minutes
 
 export async function runTokenRefresh(
 	configDir?: string,
@@ -211,8 +214,8 @@ export async function runTokenRefresh(
 			body: body.toString(),
 		});
 		verbose(`Response: ${response.status} ${response.statusText}`);
-	} catch (err) {
-		const error = err instanceof Error ? err.message : String(err);
+	} catch (error_) {
+		const error = error_ instanceof Error ? error_.message : String(error_);
 		throw new Error(
 			`Token refresh failed: ${error}. Run \`aitool auth login\` to re-authenticate.`,
 		);

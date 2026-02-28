@@ -22,10 +22,16 @@ const KNOWN_KEYS = new Set(KNOWN_CLAIMS.map(c => c.key));
 type Step = 'loading' | 'success' | 'error';
 
 type Props = {
-	configDir?: string;
+	readonly configDir?: string;
 };
 
-function ClaimRow({label, value}: {label: string; value: unknown}) {
+function ClaimRow({
+	label,
+	value,
+}: {
+	readonly label: string;
+	readonly value: unknown;
+}) {
 	const display =
 		typeof value === 'boolean' ? (value ? 'yes' : 'no') : String(value);
 
@@ -49,14 +55,18 @@ export default function AuthUserinfo({configDir}: Props) {
 				const result = await runAuthUserinfo(configDir);
 				setInfo(result);
 				setStep('success');
-				setTimeout(() => exit(), 100);
-			} catch (err) {
-				setErrorMessage(err instanceof Error ? err.message : String(err));
+				setTimeout(() => {
+					exit();
+				}, 100);
+			} catch (error) {
+				setErrorMessage(error instanceof Error ? error.message : String(error));
 				setStep('error');
-				setTimeout(() => exit(), 100);
+				setTimeout(() => {
+					exit();
+				}, 100);
 			}
 		})();
-	}, []);
+	}, [configDir, exit]);
 
 	if (step === 'loading') {
 		return (

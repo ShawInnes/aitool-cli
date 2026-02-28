@@ -12,9 +12,9 @@ import {
 	getCredentialsFilePath,
 } from './paths.js';
 
-function verbose(msg: string): void {
+function verbose(message: string): void {
 	if (process.env['AITOOL_VERBOSE'] === '1') {
-		console.error(`[verbose] ${msg}`);
+		console.error(`[verbose] ${message}`);
 	}
 }
 

@@ -7,7 +7,7 @@ import {
 } from '../commands/authStatus.js';
 
 type Props = {
-	status: AuthStatusResult;
+	readonly status: AuthStatusResult;
 };
 
 const tokenColors: Record<TokenStatus, string> = {
@@ -24,7 +24,13 @@ const tokenLabels: Record<TokenStatus, string> = {
 	unknown: '— unknown',
 };
 
-function Row({label, children}: {label: string; children: React.ReactNode}) {
+function Row({
+	label,
+	children,
+}: {
+	readonly label: string;
+	readonly children: React.ReactNode;
+}) {
 	return (
 		<Box gap={1}>
 			<Text color="gray">{label.padEnd(14)}</Text>
@@ -61,38 +67,38 @@ export default function AuthStatus({status}: Props) {
 					</Text>
 				</Row>
 
-				{status.expiresAt && (
+				{status.expiresAt ? (
 					<Row label="expires">
 						<Text>{formatRelativeTime(status.expiresAt)}</Text>
 						<Text color="gray">({status.expiresAt})</Text>
 					</Row>
-				)}
+				) : null}
 			</Box>
 
-			{status.configured && (
+			{status.configured ? (
 				<Box
 					flexDirection="column"
 					borderStyle="single"
 					borderColor="gray"
 					paddingX={1}
 				>
-					{status.issuer && (
+					{status.issuer ? (
 						<Row label="issuer">
 							<Text>{status.issuer}</Text>
 						</Row>
-					)}
-					{status.clientId && (
+					) : null}
+					{status.clientId ? (
 						<Row label="clientId">
 							<Text>{status.clientId}</Text>
 						</Row>
-					)}
-					{status.scopes && (
+					) : null}
+					{status.scopes ? (
 						<Row label="scopes">
 							<Text>{status.scopes.join(' ')}</Text>
 						</Row>
-					)}
+					) : null}
 				</Box>
-			)}
+			) : null}
 		</Box>
 	);
 }

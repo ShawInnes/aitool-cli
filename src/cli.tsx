@@ -28,7 +28,7 @@ type GlobalOptions = {
 };
 
 function isTuiMode(globalOptions: GlobalOptions): boolean {
-	return globalOptions.tui && process.stdout.isTTY !== false;
+	return globalOptions.tui && process.stdout.isTTY;
 }
 
 const program = new Command();
@@ -106,7 +106,7 @@ program
 				console.log(`  issuer:   ${result.issuer}`);
 				console.log(`  clientId: ${result.clientId}`);
 			} else {
-				render(<SetupWizard configDir={configDir} reset={options.reset} />);
+				render(<SetupWizard configDir={configDir} forceReset={options.reset} />);
 			}
 		},
 	);
@@ -131,6 +131,7 @@ configCommand
 				`token_endpoint:      ${config.cachedDiscovery.token_endpoint}`,
 			);
 		}
+
 		if (config.discoveryFetchedAt) {
 			console.log(`discoveryFetchedAt:  ${config.discoveryFetchedAt}`);
 		}
@@ -140,7 +141,7 @@ configCommand
 	.command('get <key>')
 	.description('Get a config value (clientId, scopes, discoveryUrl)')
 	.action(async (key: string, _options: unknown, command: Command) => {
-		const configDir = command.parent!.parent!.opts<GlobalOptions>().configDir;
+		const {configDir} = command.parent!.parent!.opts<GlobalOptions>();
 		await runConfigGet(key, configDir);
 	});
 
@@ -149,7 +150,7 @@ configCommand
 	.description('Set a config value (clientId, scopes, discoveryUrl)')
 	.action(
 		async (key: string, value: string, _options: unknown, command: Command) => {
-			const configDir = command.parent!.parent!.opts<GlobalOptions>().configDir;
+			const {configDir} = command.parent!.parent!.opts<GlobalOptions>();
 			await runConfigSet(key, value, configDir);
 		},
 	);
@@ -239,7 +240,9 @@ authCommand
 		const globalOptions = command.parent!.parent!.opts<GlobalOptions>();
 		const {configDir} = globalOptions;
 
-		if (!isTuiMode(globalOptions)) {
+		if (isTuiMode(globalOptions)) {
+			render(<AuthLogin configDir={configDir} />);
+		} else {
 			const start = await startDeviceAuth(configDir);
 			openBrowser(start.verificationUriComplete ?? start.verificationUri);
 			console.log(`Open this URL in your browser: ${start.verificationUri}`);
@@ -248,8 +251,6 @@ authCommand
 			const result = await runAuthLogin(configDir);
 			console.log('Authentication successful. Credentials saved.');
 			if (result.expiresAt) console.log(`  expires: ${result.expiresAt}`);
-		} else {
-			render(<AuthLogin configDir={configDir} />);
 		}
 	});
 
@@ -268,16 +269,18 @@ program.hook('preAction', (_thisCommand, actionCommand) => {
 		commandPath.unshift(cmd.name());
 		cmd = cmd.parent;
 	}
-	const rootOpts = cmd.opts<{configDir?: string; verbose?: boolean}>();
-	if (rootOpts.verbose) {
+
+	const rootOptions = cmd.opts<{configDir?: string; verbose?: boolean}>();
+	if (rootOptions.verbose) {
 		process.env['AITOOL_VERBOSE'] = '1';
 	}
-	const configDir = rootOpts.configDir;
+
+	const {configDir} = rootOptions;
 	if (commandPath[0] === 'auth') return;
 	warnIfTokenExpiring(configDir);
 });
 
-program.parseAsync().catch((err: Error) => {
-	console.error(`Error: ${err.message}`);
+program.parseAsync().catch((error: Error) => {
+	console.error(`Error: ${error.message}`);
 	process.exit(1);
 });

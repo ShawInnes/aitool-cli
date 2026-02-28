@@ -5,18 +5,18 @@ import {runSetupCli, resetConfig} from '../commands/setup.js';
 type Step = 'resetting' | 'input' | 'fetching' | 'success' | 'error';
 
 type Props = {
-	configDir?: string;
-	onComplete?: () => void;
-	reset?: boolean;
+	readonly configDir?: string;
+	readonly onComplete?: () => void;
+	readonly forceReset?: boolean;
 };
 
-export default function SetupWizard({configDir, onComplete, reset}: Props) {
-	const [step, setStep] = useState<Step>(reset ? 'resetting' : 'input');
+export default function SetupWizard({configDir, onComplete, forceReset}: Props) {
+	const [step, setStep] = useState<Step>(forceReset ? 'resetting' : 'input');
 	const [inputUrl, setInputUrl] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 
 	useEffect(() => {
-		if (!reset) return;
+		if (!forceReset) return;
 		resetConfig(configDir)
 			.then(() => {
 				setStep('input');
@@ -25,16 +25,16 @@ export default function SetupWizard({configDir, onComplete, reset}: Props) {
 				setErrorMessage(error instanceof Error ? error.message : String(error));
 				setStep('error');
 			});
-	}, []);
+	}, [configDir, forceReset]);
 
 	useInput((input, key) => {
 		if (step === 'input') {
 			if (key.return) {
 				void runSetup(inputUrl.trim());
 			} else if (key.backspace || key.delete) {
-				setInputUrl(prev => prev.slice(0, -1));
+				setInputUrl(previous => previous.slice(0, -1));
 			} else if (input) {
-				setInputUrl(prev => prev + input);
+				setInputUrl(previous => previous + input);
 			}
 		} else if (step === 'error' && key.return) {
 			setStep('input');
@@ -49,8 +49,8 @@ export default function SetupWizard({configDir, onComplete, reset}: Props) {
 			await runSetupCli(url, configDir);
 			setStep('success');
 			onComplete?.();
-		} catch (err) {
-			setErrorMessage(err instanceof Error ? err.message : String(err));
+		} catch (error) {
+			setErrorMessage(error instanceof Error ? error.message : String(error));
 			setStep('error');
 		}
 	}
@@ -72,7 +72,7 @@ export default function SetupWizard({configDir, onComplete, reset}: Props) {
 				<Box>
 					<Text color="cyan">{'> '}</Text>
 					<Text>{inputUrl}</Text>
-					<Text color="gray">{'█'}</Text>
+					<Text color="gray">█</Text>
 				</Box>
 				<Text color="gray">Press Enter to continue</Text>
 			</Box>
@@ -98,7 +98,7 @@ export default function SetupWizard({configDir, onComplete, reset}: Props) {
 		);
 	}
 
-	// error
+	// Error
 	return (
 		<Box flexDirection="column" gap={1}>
 			<Text bold>aitool — First-Run Setup</Text>

@@ -9,9 +9,9 @@ import {
 } from './schemas.js';
 import {writeConfig} from './store.js';
 
-function verbose(msg: string): void {
+function verbose(message: string): void {
 	if (process.env['AITOOL_VERBOSE'] === '1') {
-		console.error(`[verbose] ${msg}`);
+		console.error(`[verbose] ${message}`);
 	}
 }
 
@@ -31,8 +31,8 @@ export function loadRemoteConfigFromFile(filePath: string): RemoteConfig {
 	const absolutePath = resolve(filePath);
 	let raw: unknown;
 	try {
-		raw = JSON.parse(readFileSync(absolutePath, 'utf-8'));
-	} catch (err) {
+		raw = JSON.parse(readFileSync(absolutePath, 'utf8'));
+	} catch {
 		throw new Error(`Failed to read config file: ${absolutePath}`);
 	}
 

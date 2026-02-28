@@ -2,7 +2,7 @@ import {z} from 'zod';
 
 /** Schema for the remote config document fetched from the corp-provided URL */
 export const RemoteConfigSchema = z.object({
-	discoveryUrl: z.string().url(),
+	discoveryUrl: z.url(),
 	clientId: z.string().min(1),
 	scopes: z
 		.array(z.string())
@@ -13,22 +13,22 @@ export type RemoteConfig = z.infer<typeof RemoteConfigSchema>;
 
 /** Schema for the OIDC discovery document */
 export const OidcDiscoverySchema = z.object({
-	issuer: z.string().url(),
-	authorization_endpoint: z.string().url(),
-	token_endpoint: z.string().url(),
-	device_authorization_endpoint: z.string().url(),
-	userinfo_endpoint: z.string().url().optional(),
+	issuer: z.url(),
+	authorization_endpoint: z.url(),
+	token_endpoint: z.url(),
+	device_authorization_endpoint: z.url(),
+	userinfo_endpoint: z.url().optional(),
 });
 
 export type OidcDiscovery = z.infer<typeof OidcDiscoverySchema>;
 
 /** Schema for the locally stored config.json */
 export const LocalConfigSchema = z.object({
-	discoveryUrl: z.string().url(),
+	discoveryUrl: z.url(),
 	clientId: z.string().min(1),
 	scopes: z.array(z.string()),
 	cachedDiscovery: OidcDiscoverySchema.optional(),
-	discoveryFetchedAt: z.string().datetime().optional(),
+	discoveryFetchedAt: z.iso.datetime().optional(),
 });
 
 export type LocalConfig = z.infer<typeof LocalConfigSchema>;
@@ -37,8 +37,8 @@ export type LocalConfig = z.infer<typeof LocalConfigSchema>;
 export const DeviceAuthResponseSchema = z.object({
 	device_code: z.string(),
 	user_code: z.string(),
-	verification_uri: z.string().url(),
-	verification_uri_complete: z.string().url().optional(),
+	verification_uri: z.url(),
+	verification_uri_complete: z.url().optional(),
 	expires_in: z.number(),
 	interval: z.number().default(5),
 });
@@ -64,7 +64,7 @@ export const CredentialsSchema = z.object({
 	refreshToken: z.string().optional(),
 	idToken: z.string().optional(),
 	scope: z.string().optional(),
-	expiresAt: z.string().datetime().optional(),
+	expiresAt: z.iso.datetime().optional(),
 });
 
 export type Credentials = z.infer<typeof CredentialsSchema>;

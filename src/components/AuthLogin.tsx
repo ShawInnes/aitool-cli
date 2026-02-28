@@ -11,14 +11,16 @@ import {
 type Step = 'init' | 'code_ready' | 'success' | 'error';
 
 type Props = {
-	configDir?: string;
-	onComplete?: (result: AuthLoginResult) => void;
+	readonly configDir?: string;
+	readonly onComplete?: (result: AuthLoginResult) => void;
 };
 
 export default function AuthLogin({configDir, onComplete}: Props) {
 	const {exit} = useApp();
 	const [step, setStep] = useState<Step>('init');
-	const [deviceAuth, setDeviceAuth] = useState<DeviceAuthStart | null>(null);
+	const [deviceAuth, setDeviceAuth] = useState<DeviceAuthStart | undefined>(
+		undefined,
+	);
 	const [secondsLeft, setSecondsLeft] = useState(0);
 	const [errorMessage, setErrorMessage] = useState('');
 	const pollingRef = useRef(false);
@@ -40,12 +42,12 @@ export default function AuthLogin({configDir, onComplete}: Props) {
 				setDeviceAuth(auth);
 				setSecondsLeft(auth.expiresIn);
 				setStep('code_ready');
-			} catch (err) {
-				setErrorMessage(err instanceof Error ? err.message : String(err));
+			} catch (error) {
+				setErrorMessage(error instanceof Error ? error.message : String(error));
 				setStep('error');
 			}
 		})();
-	}, [step]);
+	}, [step, configDir]);
 
 	useEffect(() => {
 		if (step !== 'code_ready' || !deviceAuth || pollingRef.current) return;
@@ -56,19 +58,25 @@ export default function AuthLogin({configDir, onComplete}: Props) {
 				const result = await pollForToken(deviceAuth, configDir);
 				setStep('success');
 				onComplete?.(result);
-				setTimeout(() => exit(), 1000);
-			} catch (err) {
-				setErrorMessage(err instanceof Error ? err.message : String(err));
+				setTimeout(() => {
+					exit();
+				}, 1000);
+			} catch (error) {
+				setErrorMessage(error instanceof Error ? error.message : String(error));
 				setStep('error');
 			}
 		})();
-	}, [step, deviceAuth]);
+	}, [step, deviceAuth, configDir, exit, onComplete]);
 
 	useEffect(() => {
 		if (step !== 'code_ready') return;
 		if (secondsLeft <= 0) return;
-		const timer = setTimeout(() => setSecondsLeft(s => s - 1), 1000);
-		return () => clearTimeout(timer);
+		const timer = setTimeout(() => {
+			setSecondsLeft(s => s - 1);
+		}, 1000);
+		return () => {
+			clearTimeout(timer);
+		};
 	}, [step, secondsLeft]);
 
 	if (step === 'init') {
@@ -116,7 +124,7 @@ export default function AuthLogin({configDir, onComplete}: Props) {
 		);
 	}
 
-	// error
+	// Error
 	return (
 		<Box flexDirection="column" gap={1}>
 			<Text bold>aitool — Login</Text>
