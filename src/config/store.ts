@@ -44,7 +44,7 @@ export function readCredentials(configDir?: string): Credentials {
 export function writeCredentials(credentials: Credentials, configDir?: string): void {
 	const dir = configDir ?? getConfigDir();
 	fs.mkdirSync(dir, {recursive: true});
-	const filePath = getCredentialsFilePath(configDir ?? dir);
+	const filePath = getCredentialsFilePath(dir);
 	verbose(`Writing credentials to ${filePath}`);
 	fs.writeFileSync(filePath, JSON.stringify(credentials, null, 2), {mode: 0o600});
 }

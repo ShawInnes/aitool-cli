@@ -7,6 +7,12 @@ import {
 } from '../config/schemas.js';
 import {credentialsExist, readConfig, readCredentials, writeCredentials} from '../config/store.js';
 
+function verbose(msg: string): void {
+	if (process.env['AITOOL_VERBOSE'] === '1') {
+		console.error(`[verbose] ${msg}`);
+	}
+}
+
 export type DeviceAuthStart = {
 	deviceCode: string;
 	userCode: string;
@@ -43,11 +49,13 @@ export async function startDeviceAuth(configDir?: string): Promise<DeviceAuthSta
 		scope: config.scopes.join(' '),
 	});
 
+	verbose(`POST ${discovery.device_authorization_endpoint}`);
 	const response = await fetch(discovery.device_authorization_endpoint, {
 		method: 'POST',
 		headers: {'Content-Type': 'application/x-www-form-urlencoded'},
 		body: body.toString(),
 	});
+	verbose(`Response: ${response.status} ${response.statusText}`);
 
 	if (!response.ok) {
 		throw new Error(
@@ -88,11 +96,13 @@ export async function pollForToken(
 			client_id: config.clientId,
 		});
 
+		verbose(`POST ${discovery.token_endpoint}`);
 		const response = await fetch(discovery.token_endpoint, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/x-www-form-urlencoded'},
 			body: body.toString(),
 		});
+		verbose(`Response: ${response.status} ${response.statusText}`);
 
 		const data = (await response.json()) as unknown;
 
@@ -175,11 +185,13 @@ export async function runTokenRefresh(configDir?: string): Promise<TokenRefreshR
 
 	let response: Response;
 	try {
+		verbose(`POST ${discovery.token_endpoint}`);
 		response = await fetch(discovery.token_endpoint, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/x-www-form-urlencoded'},
 			body: body.toString(),
 		});
+		verbose(`Response: ${response.status} ${response.statusText}`);
 	} catch (err) {
 		const error = err instanceof Error ? err.message : String(err);
 		throw new Error(`Token refresh failed: ${error}. Run \`aitool auth login\` to re-authenticate.`);
