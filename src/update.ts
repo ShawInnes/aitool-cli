@@ -8,19 +8,19 @@ const BINARY_NAME = 'aitool';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function getPlatformBinary(): string {
+function getPlatformAssets(): {archive: string; binary: string} {
 	const key = `${process.platform}-${process.arch}`;
-	const map: Record<string, string> = {
-		'darwin-arm64': 'aitool-darwin-arm64',
-		'darwin-x64': 'aitool-darwin-x64',
-		'linux-x64': 'aitool-linux-x64',
-		'linux-arm64': 'aitool-linux-arm64',
-		'win32-x64': 'aitool-win-x64.exe',
-		'win32-arm64': 'aitool-win-arm64.exe',
+	const map: Record<string, {archive: string; binary: string}> = {
+		'darwin-arm64': {archive: 'aitool-darwin-arm64.tar.gz', binary: 'aitool-darwin-arm64'},
+		'darwin-x64':   {archive: 'aitool-darwin-x64.tar.gz',   binary: 'aitool-darwin-x64'},
+		'linux-x64':    {archive: 'aitool-linux-x64.tar.gz',    binary: 'aitool-linux-x64'},
+		'linux-arm64':  {archive: 'aitool-linux-arm64.tar.gz',  binary: 'aitool-linux-arm64'},
+		'win32-x64':    {archive: 'aitool-win-x64.zip',         binary: 'aitool-win-x64.exe'},
+		'win32-arm64':  {archive: 'aitool-win-arm64.zip',       binary: 'aitool-win-arm64.exe'},
 	};
-	const bin = map[key];
-	if (!bin) throw new Error(`No release binary for platform: ${key}`);
-	return bin;
+	const assets = map[key];
+	if (!assets) throw new Error(`No release binary for platform: ${key}`);
+	return assets;
 }
 
 function compareVersions(a: string, b: string): number {
@@ -50,8 +50,8 @@ async function fetchLatestVersion(): Promise<string> {
 }
 
 async function verifyChecksum(
-	buffer: ArrayBuffer,
-	binaryName: string,
+	archivePath: string,
+	archiveName: string,
 	version: string,
 ): Promise<void> {
 	const res = await fetch(
@@ -64,13 +64,15 @@ async function verifyChecksum(
 	}
 
 	const text = await res.text();
-	const line = text.split('\n').find((l) => l.includes(binaryName));
+	const line = text.split('\n').find((l) => l.includes(archiveName));
 	const expected = line?.split(/\s+/)[0];
 	if (!expected) {
-		console.warn(`Warning: no checksum found for ${binaryName}, skipping.`);
+		console.warn(`Warning: no checksum found for ${archiveName}, skipping.`);
 		return;
 	}
 
+	const file = Bun.file(archivePath);
+	const buffer = await file.arrayBuffer();
 	const hasher = new Bun.CryptoHasher('sha256');
 	hasher.update(buffer);
 	const actual = hasher.digest('hex');
@@ -82,6 +84,12 @@ async function verifyChecksum(
 	}
 
 	console.log('Checksum verified.');
+}
+
+async function spawnAndCheck(cmd: string[]): Promise<void> {
+	const proc = Bun.spawn(cmd, {stderr: 'inherit'});
+	const code = await proc.exited;
+	if (code !== 0) throw new Error(`Command failed (exit ${code}): ${cmd.join(' ')}`);
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -106,32 +114,41 @@ export async function selfUpdate(): Promise<void> {
 
 	console.log(`Updating ${CURRENT_VERSION} → ${latest}...`);
 
-	const binaryName = getPlatformBinary();
-	const url = `https://github.com/${REPO}/releases/download/v${latest}/${binaryName}`;
+	const {archive, binary} = getPlatformAssets();
+	const url = `https://github.com/${REPO}/releases/download/v${latest}/${archive}`;
 
 	const res = await fetch(url, {headers: {'User-Agent': BINARY_NAME}});
 	if (!res.ok) throw new Error(`Download failed: ${res.status}`);
-	const buffer = await res.arrayBuffer();
 
-	await verifyChecksum(buffer, binaryName, latest);
+	const tmpDir = join(tmpdir(), `${BINARY_NAME}-update-${Date.now()}`);
+	const archivePath = join(tmpDir, archive);
+	await spawnAndCheck(['mkdir', '-p', tmpDir]);
+	await Bun.write(archivePath, await res.arrayBuffer());
 
-	// Windows: cannot rename over a running .exe — write alongside and instruct user.
+	await verifyChecksum(archivePath, archive, latest);
+
 	if (process.platform === 'win32') {
-		const dest = process.execPath.replace(/\.exe$/i, '') + `-new.exe`;
-		await Bun.write(dest, buffer);
+		// Windows: cannot replace a running .exe — extract alongside and instruct user.
+		await spawnAndCheck([
+			'powershell', '-NoProfile', '-Command',
+			`Expand-Archive -Path '${archivePath}' -DestinationPath '${tmpDir}' -Force`,
+		]);
+		const extractedExe = join(tmpDir, binary);
+		const dest = process.execPath.replace(/\.exe$/i, '') + '-new.exe';
+		renameSync(extractedExe, dest);
 		console.log(`\nDownloaded new binary to: ${dest}`);
 		console.log(
-			`To complete the update, replace the current binary manually:\n` +
+			`To complete the update, replace the current binary:\n` +
 				`  move /Y "${dest}" "${process.execPath}"`,
 		);
 		return;
 	}
 
-	// Unix: write to a temp file, then atomically rename over the running binary.
-	const tmpPath = join(tmpdir(), `${BINARY_NAME}-update-${Date.now()}`);
-	await Bun.write(tmpPath, buffer);
-	chmodSync(tmpPath, 0o755);
-	renameSync(tmpPath, process.execPath);
+	// Unix: extract tar.gz, then atomically rename over the running binary.
+	await spawnAndCheck(['tar', 'xzf', archivePath, '-C', tmpDir]);
+	const extractedBin = join(tmpDir, binary);
+	chmodSync(extractedBin, 0o755);
+	renameSync(extractedBin, process.execPath);
 
 	console.log(
 		`\nUpdated to ${latest}. Restart ${BINARY_NAME} to use the new version.`,
