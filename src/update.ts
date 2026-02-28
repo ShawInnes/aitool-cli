@@ -1,4 +1,4 @@
-import {chmodSync, renameSync} from 'node:fs';
+import {chmodSync, mkdirSync, renameSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import pkg from '../package.json';
@@ -135,7 +135,7 @@ export async function selfUpdate(): Promise<void> {
 
 	const tmpDir = join(tmpdir(), `${BINARY_NAME}-update-${Date.now()}`);
 	const archivePath = join(tmpDir, archive);
-	await spawnAndCheck(['mkdir', '-p', tmpDir]);
+	mkdirSync(tmpDir, {recursive: true});
 	await Bun.write(archivePath, await res.arrayBuffer());
 
 	await verifyChecksum(archivePath, archive, latest);
