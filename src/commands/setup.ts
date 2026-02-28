@@ -17,7 +17,6 @@ export type SetupResult = {
 export async function resetConfig(configDir?: string): Promise<void> {
 	await rm(getConfigFilePath(configDir), {force: true});
 	await rm(getCredentialsFilePath(configDir), {force: true});
-	console.log('Config reset. Starting fresh setup...');
 }
 
 async function runSetup(remoteConfig: RemoteConfig, configDir?: string): Promise<SetupResult> {
