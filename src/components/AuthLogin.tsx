@@ -1,6 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Box, Text, useApp, useInput} from 'ink';
-import {type DeviceAuthStart, type AuthLoginResult, openBrowser, pollForToken, startDeviceAuth} from '../commands/auth.js';
+import {
+	type DeviceAuthStart,
+	type AuthLoginResult,
+	openBrowser,
+	pollForToken,
+	startDeviceAuth,
+} from '../commands/auth.js';
 
 type Step = 'init' | 'code_ready' | 'success' | 'error';
 
@@ -61,7 +67,7 @@ export default function AuthLogin({configDir, onComplete}: Props) {
 	useEffect(() => {
 		if (step !== 'code_ready') return;
 		if (secondsLeft <= 0) return;
-		const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+		const timer = setTimeout(() => setSecondsLeft(s => s - 1), 1000);
 		return () => clearTimeout(timer);
 	}, [step, secondsLeft]);
 
@@ -77,7 +83,9 @@ export default function AuthLogin({configDir, onComplete}: Props) {
 	if (step === 'code_ready' && deviceAuth) {
 		const minutes = Math.floor(secondsLeft / 60);
 		const seconds = secondsLeft % 60;
-		const countdown = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+		const countdown = `${String(minutes).padStart(2, '0')}:${String(
+			seconds,
+		).padStart(2, '0')}`;
 
 		return (
 			<Box flexDirection="column" gap={1}>
@@ -90,7 +98,9 @@ export default function AuthLogin({configDir, onComplete}: Props) {
 						{deviceAuth.userCode}
 					</Text>
 				</Box>
-				<Text color="gray">Waiting for authentication… {countdown} remaining</Text>
+				<Text color="gray">
+					Waiting for authentication… {countdown} remaining
+				</Text>
 			</Box>
 		);
 	}
@@ -99,7 +109,9 @@ export default function AuthLogin({configDir, onComplete}: Props) {
 		return (
 			<Box flexDirection="column" gap={1}>
 				<Text bold>aitool — Login</Text>
-				<Text color="green">✓ Authentication successful. Credentials saved.</Text>
+				<Text color="green">
+					✓ Authentication successful. Credentials saved.
+				</Text>
 			</Box>
 		);
 	}

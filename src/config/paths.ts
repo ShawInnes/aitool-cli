@@ -4,7 +4,12 @@ import * as path from 'node:path';
 export function getConfigDir(): string {
 	switch (process.platform) {
 		case 'darwin':
-			return path.join(os.homedir(), 'Library', 'Application Support', 'aitool');
+			return path.join(
+				os.homedir(),
+				'Library',
+				'Application Support',
+				'aitool',
+			);
 		case 'win32':
 			return path.join(process.env['APPDATA'] ?? os.homedir(), 'aitool');
 		default:

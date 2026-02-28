@@ -32,9 +32,9 @@ export default function SetupWizard({configDir, onComplete, reset}: Props) {
 			if (key.return) {
 				void runSetup(inputUrl.trim());
 			} else if (key.backspace || key.delete) {
-				setInputUrl((prev) => prev.slice(0, -1));
+				setInputUrl(prev => prev.slice(0, -1));
 			} else if (input) {
-				setInputUrl((prev) => prev + input);
+				setInputUrl(prev => prev + input);
 			}
 		} else if (step === 'error' && key.return) {
 			setStep('input');

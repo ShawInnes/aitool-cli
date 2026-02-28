@@ -12,12 +12,27 @@ const BINARY_NAME = 'aitool';
 function getPlatformAssets(): {archive: string; binary: string} {
 	const key = `${process.platform}-${process.arch}`;
 	const map: Record<string, {archive: string; binary: string}> = {
-		'darwin-arm64': {archive: 'aitool-darwin-arm64.tar.gz', binary: 'aitool-darwin-arm64'},
-		'darwin-x64':   {archive: 'aitool-darwin-x64.tar.gz',   binary: 'aitool-darwin-x64'},
-		'linux-x64':    {archive: 'aitool-linux-x64.tar.gz',    binary: 'aitool-linux-x64'},
-		'linux-arm64':  {archive: 'aitool-linux-arm64.tar.gz',  binary: 'aitool-linux-arm64'},
-		'win32-x64':    {archive: 'aitool-win-x64.zip',         binary: 'aitool-win-x64.exe'},
-		'win32-arm64':  {archive: 'aitool-win-arm64.zip',       binary: 'aitool-win-arm64.exe'},
+		'darwin-arm64': {
+			archive: 'aitool-darwin-arm64.tar.gz',
+			binary: 'aitool-darwin-arm64',
+		},
+		'darwin-x64': {
+			archive: 'aitool-darwin-x64.tar.gz',
+			binary: 'aitool-darwin-x64',
+		},
+		'linux-x64': {
+			archive: 'aitool-linux-x64.tar.gz',
+			binary: 'aitool-linux-x64',
+		},
+		'linux-arm64': {
+			archive: 'aitool-linux-arm64.tar.gz',
+			binary: 'aitool-linux-arm64',
+		},
+		'win32-x64': {archive: 'aitool-win-x64.zip', binary: 'aitool-win-x64.exe'},
+		'win32-arm64': {
+			archive: 'aitool-win-arm64.zip',
+			binary: 'aitool-win-arm64.exe',
+		},
 	};
 	const assets = map[key];
 	if (!assets) throw new Error(`No release binary for platform: ${key}`);
@@ -25,11 +40,7 @@ function getPlatformAssets(): {archive: string; binary: string} {
 }
 
 function compareVersions(a: string, b: string): number {
-	const parse = (v: string) =>
-		v
-			.replace(/^v/, '')
-			.split('.')
-			.map(Number);
+	const parse = (v: string) => v.replace(/^v/, '').split('.').map(Number);
 	const pa = parse(a);
 	const pb = parse(b);
 	for (let i = 0; i < 3; i++) {
@@ -65,7 +76,7 @@ async function verifyChecksum(
 	}
 
 	const text = await res.text();
-	const line = text.split('\n').find((l) => l.includes(archiveName));
+	const line = text.split('\n').find(l => l.includes(archiveName));
 	const expected = line?.split(/\s+/)[0];
 	if (!expected) {
 		console.warn(`Warning: no checksum found for ${archiveName}, skipping.`);
@@ -90,7 +101,8 @@ async function verifyChecksum(
 async function spawnAndCheck(cmd: string[]): Promise<void> {
 	const proc = Bun.spawn(cmd, {stderr: 'inherit'});
 	const code = await proc.exited;
-	if (code !== 0) throw new Error(`Command failed (exit ${code}): ${cmd.join(' ')}`);
+	if (code !== 0)
+		throw new Error(`Command failed (exit ${code}): ${cmd.join(' ')}`);
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -131,7 +143,9 @@ export async function selfUpdate(): Promise<void> {
 	if (process.platform === 'win32') {
 		// Windows: cannot replace a running .exe — extract alongside and instruct user.
 		await spawnAndCheck([
-			'powershell', '-NoProfile', '-Command',
+			'powershell',
+			'-NoProfile',
+			'-Command',
 			`Expand-Archive -Path '${archivePath}' -DestinationPath '${tmpDir}' -Force`,
 		]);
 		const extractedExe = join(tmpDir, binary);

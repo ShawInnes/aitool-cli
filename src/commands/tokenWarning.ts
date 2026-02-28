@@ -16,14 +16,18 @@ export function warnIfTokenExpiring(configDir?: string): void {
 	const msUntilExpiry = new Date(credentials.expiresAt).getTime() - Date.now();
 
 	if (msUntilExpiry <= 0) {
-		console.error('Warning: Your token has expired. Run `aitool auth login` to re-authenticate.');
+		console.error(
+			'Warning: Your token has expired. Run `aitool auth login` to re-authenticate.',
+		);
 		return;
 	}
 
 	const minutesUntilExpiry = Math.ceil(msUntilExpiry / (1000 * 60));
 	if (minutesUntilExpiry <= 5) {
 		console.error(
-			`Warning: Your token expires in ${minutesUntilExpiry} minute${minutesUntilExpiry === 1 ? '' : 's'}. Run \`aitool auth login\` to re-authenticate.`,
+			`Warning: Your token expires in ${minutesUntilExpiry} minute${
+				minutesUntilExpiry === 1 ? '' : 's'
+			}. Run \`aitool auth login\` to re-authenticate.`,
 		);
 	}
 }

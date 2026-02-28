@@ -22,14 +22,14 @@ irm https://raw.githubusercontent.com/ShawInnes/aitool-cli/main/scripts/install.
 Download the binary that matches your platform from
 the [latest release](https://github.com/ShawInnes/aitool-cli/releases/latest):
 
-| Platform      | Archive                          |
-|---------------|----------------------------------|
-| macOS (Apple) | `aitool-darwin-arm64.tar.gz`     |
-| macOS (Intel) | `aitool-darwin-x64.tar.gz`       |
-| Linux (x64)   | `aitool-linux-x64.tar.gz`        |
-| Linux (ARM64) | `aitool-linux-arm64.tar.gz`      |
-| Windows (x64) | `aitool-win-x64.zip`             |
-| Windows (ARM) | `aitool-win-arm64.zip`           |
+| Platform      | Archive                      |
+| ------------- | ---------------------------- |
+| macOS (Apple) | `aitool-darwin-arm64.tar.gz` |
+| macOS (Intel) | `aitool-darwin-x64.tar.gz`   |
+| Linux (x64)   | `aitool-linux-x64.tar.gz`    |
+| Linux (ARM64) | `aitool-linux-arm64.tar.gz`  |
+| Windows (x64) | `aitool-win-x64.zip`         |
+| Windows (ARM) | `aitool-win-arm64.zip`       |
 
 Then extract and move the binary onto your PATH:
 

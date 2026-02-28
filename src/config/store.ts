@@ -1,7 +1,16 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import {type Credentials, CredentialsSchema, type LocalConfig, LocalConfigSchema} from './schemas.js';
-import {getConfigDir, getConfigFilePath, getCredentialsFilePath} from './paths.js';
+import {
+	type Credentials,
+	CredentialsSchema,
+	type LocalConfig,
+	LocalConfigSchema,
+} from './schemas.js';
+import {
+	getConfigDir,
+	getConfigFilePath,
+	getCredentialsFilePath,
+} from './paths.js';
 
 function verbose(msg: string): void {
 	if (process.env['AITOOL_VERBOSE'] === '1') {
@@ -41,10 +50,15 @@ export function readCredentials(configDir?: string): Credentials {
 	return CredentialsSchema.parse(raw);
 }
 
-export function writeCredentials(credentials: Credentials, configDir?: string): void {
+export function writeCredentials(
+	credentials: Credentials,
+	configDir?: string,
+): void {
 	const dir = configDir ?? getConfigDir();
 	fs.mkdirSync(dir, {recursive: true});
 	const filePath = getCredentialsFilePath(dir);
 	verbose(`Writing credentials to ${filePath}`);
-	fs.writeFileSync(filePath, JSON.stringify(credentials, null, 2), {mode: 0o600});
+	fs.writeFileSync(filePath, JSON.stringify(credentials, null, 2), {
+		mode: 0o600,
+	});
 }

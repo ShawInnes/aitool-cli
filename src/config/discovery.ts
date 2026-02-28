@@ -39,7 +39,9 @@ export function loadRemoteConfigFromFile(filePath: string): RemoteConfig {
 	return RemoteConfigSchema.parse(raw);
 }
 
-export async function fetchOidcDiscovery(discoveryUrl: string): Promise<OidcDiscovery> {
+export async function fetchOidcDiscovery(
+	discoveryUrl: string,
+): Promise<OidcDiscovery> {
 	verbose(`GET ${discoveryUrl}`);
 	const response = await fetch(discoveryUrl);
 	verbose(`Response: ${response.status} ${response.statusText}`);
@@ -68,8 +70,13 @@ export async function getDiscovery(
 	config: LocalConfig,
 	configDir?: string,
 ): Promise<OidcDiscovery> {
-	if (config.cachedDiscovery && !isDiscoveryCacheStale(config.discoveryFetchedAt)) {
-		verbose(`Cache hit: discovery document (fetched at ${config.discoveryFetchedAt})`);
+	if (
+		config.cachedDiscovery &&
+		!isDiscoveryCacheStale(config.discoveryFetchedAt)
+	) {
+		verbose(
+			`Cache hit: discovery document (fetched at ${config.discoveryFetchedAt})`,
+		);
 		return config.cachedDiscovery;
 	}
 

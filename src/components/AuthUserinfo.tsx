@@ -17,7 +17,7 @@ const KNOWN_CLAIMS: Array<{key: string; label: string}> = [
 	{key: 'updated_at', label: 'updated at'},
 ];
 
-const KNOWN_KEYS = new Set(KNOWN_CLAIMS.map((c) => c.key));
+const KNOWN_KEYS = new Set(KNOWN_CLAIMS.map(c => c.key));
 
 type Step = 'loading' | 'success' | 'error';
 
@@ -27,11 +27,7 @@ type Props = {
 
 function ClaimRow({label, value}: {label: string; value: unknown}) {
 	const display =
-		typeof value === 'boolean'
-			? value
-				? 'yes'
-				: 'no'
-			: String(value);
+		typeof value === 'boolean' ? (value ? 'yes' : 'no') : String(value);
 
 	return (
 		<Box gap={1}>
@@ -81,7 +77,9 @@ export default function AuthUserinfo({configDir}: Props) {
 	}
 
 	const knownRows = KNOWN_CLAIMS.filter(({key}) => key in info);
-	const extraEntries = Object.entries(info).filter(([key]) => !KNOWN_KEYS.has(key));
+	const extraEntries = Object.entries(info).filter(
+		([key]) => !KNOWN_KEYS.has(key),
+	);
 
 	return (
 		<Box flexDirection="column" gap={1}>
@@ -92,7 +90,12 @@ export default function AuthUserinfo({configDir}: Props) {
 				))}
 			</Box>
 			{extraEntries.length > 0 && (
-				<Box flexDirection="column" borderStyle="single" borderColor="gray" paddingX={1}>
+				<Box
+					flexDirection="column"
+					borderStyle="single"
+					borderColor="gray"
+					paddingX={1}
+				>
 					{extraEntries.map(([key, value]) => (
 						<ClaimRow
 							key={key}

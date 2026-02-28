@@ -1,6 +1,10 @@
 import React from 'react';
 import {Box, Text} from 'ink';
-import {type AuthStatusResult, type TokenStatus, formatRelativeTime} from '../commands/authStatus.js';
+import {
+	type AuthStatusResult,
+	type TokenStatus,
+	formatRelativeTime,
+} from '../commands/authStatus.js';
 
 type Props = {
 	status: AuthStatusResult;
@@ -66,7 +70,12 @@ export default function AuthStatus({status}: Props) {
 			</Box>
 
 			{status.configured && (
-				<Box flexDirection="column" borderStyle="single" borderColor="gray" paddingX={1}>
+				<Box
+					flexDirection="column"
+					borderStyle="single"
+					borderColor="gray"
+					paddingX={1}
+				>
 					{status.issuer && (
 						<Row label="issuer">
 							<Text>{status.issuer}</Text>

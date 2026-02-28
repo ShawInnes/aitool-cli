@@ -1,8 +1,5 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(bun *)",
-      "Skill(commit-commands:commit)"
-    ]
-  }
+	"permissions": {
+		"allow": ["Bash(*)", "Skill(commit-commands:*)"]
+	}
 }

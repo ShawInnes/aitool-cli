@@ -5,7 +5,12 @@ import {
 	DeviceAuthResponseSchema,
 	TokenResponseSchema,
 } from '../config/schemas.js';
-import {credentialsExist, readConfig, readCredentials, writeCredentials} from '../config/store.js';
+import {
+	credentialsExist,
+	readConfig,
+	readCredentials,
+	writeCredentials,
+} from '../config/store.js';
 
 function verbose(msg: string): void {
 	if (process.env['AITOOL_VERBOSE'] === '1') {
@@ -33,14 +38,16 @@ export function openBrowser(url: string): void {
 		process.platform === 'win32'
 			? `start "" "${url}"`
 			: process.platform === 'darwin'
-				? `open "${url}"`
-				: `xdg-open "${url}"`;
+			? `open "${url}"`
+			: `xdg-open "${url}"`;
 	exec(cmd, () => {
 		/* fire and forget */
 	});
 }
 
-export async function startDeviceAuth(configDir?: string): Promise<DeviceAuthStart> {
+export async function startDeviceAuth(
+	configDir?: string,
+): Promise<DeviceAuthStart> {
 	const config = readConfig(configDir);
 	const discovery = await getDiscovery(config, configDir);
 
@@ -63,7 +70,9 @@ export async function startDeviceAuth(configDir?: string): Promise<DeviceAuthSta
 		);
 	}
 
-	const data = DeviceAuthResponseSchema.parse((await response.json()) as unknown);
+	const data = DeviceAuthResponseSchema.parse(
+		(await response.json()) as unknown,
+	);
 
 	return {
 		deviceCode: data.device_code,
@@ -87,7 +96,9 @@ export async function pollForToken(
 	let pollInterval = start.interval;
 
 	while (Date.now() < deadline) {
-		await new Promise<void>((resolve) => setTimeout(resolve, pollInterval * 1000));
+		await new Promise<void>(resolve =>
+			setTimeout(resolve, pollInterval * 1000),
+		);
 		onPollAttempt?.();
 
 		const body = new URLSearchParams({
@@ -114,7 +125,9 @@ export async function pollForToken(
 				continue;
 			}
 			if (error === 'expired_token') {
-				throw new Error('Device code expired. Please run `aitool auth login` again.');
+				throw new Error(
+					'Device code expired. Please run `aitool auth login` again.',
+				);
 			}
 			if (error === 'access_denied') {
 				throw new Error('Access denied.');
@@ -144,20 +157,24 @@ export async function pollForToken(
 	throw new Error('Device code expired. Please run `aitool auth login` again.');
 }
 
-export async function runAuthLogin(configDir?: string): Promise<AuthLoginResult> {
+export async function runAuthLogin(
+	configDir?: string,
+): Promise<AuthLoginResult> {
 	const start = await startDeviceAuth(configDir);
 	return pollForToken(start, configDir);
 }
 
-export type TokenRefreshResult =
-	| {status: 'refreshed'}
-	| {status: 'not_needed'};
+export type TokenRefreshResult = {status: 'refreshed'} | {status: 'not_needed'};
 
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
 
-export async function runTokenRefresh(configDir?: string): Promise<TokenRefreshResult> {
+export async function runTokenRefresh(
+	configDir?: string,
+): Promise<TokenRefreshResult> {
 	if (!credentialsExist(configDir)) {
-		throw new Error('Not authenticated. Run `aitool auth login` to authenticate.');
+		throw new Error(
+			'Not authenticated. Run `aitool auth login` to authenticate.',
+		);
 	}
 
 	const credentials = readCredentials(configDir);
@@ -171,7 +188,9 @@ export async function runTokenRefresh(configDir?: string): Promise<TokenRefreshR
 	// If expiresAt is absent, fall through and attempt refresh anyway
 
 	if (!credentials.refreshToken) {
-		throw new Error('No refresh token available. Run `aitool auth login` to re-authenticate.');
+		throw new Error(
+			'No refresh token available. Run `aitool auth login` to re-authenticate.',
+		);
 	}
 
 	const config = readConfig(configDir);
@@ -194,12 +213,16 @@ export async function runTokenRefresh(configDir?: string): Promise<TokenRefreshR
 		verbose(`Response: ${response.status} ${response.statusText}`);
 	} catch (err) {
 		const error = err instanceof Error ? err.message : String(err);
-		throw new Error(`Token refresh failed: ${error}. Run \`aitool auth login\` to re-authenticate.`);
+		throw new Error(
+			`Token refresh failed: ${error}. Run \`aitool auth login\` to re-authenticate.`,
+		);
 	}
 
 	if (!response.ok) {
 		const text = await response.text().catch(() => response.statusText);
-		throw new Error(`Token refresh failed: ${text}. Run \`aitool auth login\` to re-authenticate.`);
+		throw new Error(
+			`Token refresh failed: ${text}. Run \`aitool auth login\` to re-authenticate.`,
+		);
 	}
 
 	const data = TokenResponseSchema.parse((await response.json()) as unknown);

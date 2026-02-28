@@ -59,7 +59,12 @@ program
 	.option('--reset', 'Delete config and credentials before setup')
 	.action(
 		async (
-			options: {configUrl?: string; configFile?: string; auto?: boolean; reset?: boolean},
+			options: {
+				configUrl?: string;
+				configFile?: string;
+				auto?: boolean;
+				reset?: boolean;
+			},
 			command: Command,
 		) => {
 			const globalOptions = command.parent!.opts<GlobalOptions>();
@@ -74,11 +79,17 @@ program
 				let result: SetupResult;
 
 				if (options.auto) {
-					result = await runSetupFromEnvironment(configDir, {reset: options.reset});
+					result = await runSetupFromEnvironment(configDir, {
+						reset: options.reset,
+					});
 				} else if (options.configFile) {
-					result = await runSetupFromFile(options.configFile, configDir, {reset: options.reset});
+					result = await runSetupFromFile(options.configFile, configDir, {
+						reset: options.reset,
+					});
 				} else if (options.configUrl) {
-					result = await runSetupCli(options.configUrl, configDir, {reset: options.reset});
+					result = await runSetupCli(options.configUrl, configDir, {
+						reset: options.reset,
+					});
 				} else {
 					console.error(
 						'Error: a config source is required in non-interactive mode.',
@@ -89,7 +100,9 @@ program
 					process.exit(1);
 				}
 
-				console.log(`Setup complete. Configuration saved to ${result.configFile}`);
+				console.log(
+					`Setup complete. Configuration saved to ${result.configFile}`,
+				);
 				console.log(`  issuer:   ${result.issuer}`);
 				console.log(`  clientId: ${result.clientId}`);
 			} else {
@@ -134,10 +147,12 @@ configCommand
 configCommand
 	.command('set <key> <value>')
 	.description('Set a config value (clientId, scopes, discoveryUrl)')
-	.action(async (key: string, value: string, _options: unknown, command: Command) => {
-		const configDir = command.parent!.parent!.opts<GlobalOptions>().configDir;
-		await runConfigSet(key, value, configDir);
-	});
+	.action(
+		async (key: string, value: string, _options: unknown, command: Command) => {
+			const configDir = command.parent!.parent!.opts<GlobalOptions>().configDir;
+			await runConfigSet(key, value, configDir);
+		},
+	);
 
 const authCommand = program
 	.command('auth')
@@ -189,7 +204,9 @@ authCommand
 
 authCommand
 	.command('userinfo')
-	.description('Fetch user profile from the identity provider userinfo endpoint')
+	.description(
+		'Fetch user profile from the identity provider userinfo endpoint',
+	)
 	.action(async (_options, command: Command) => {
 		const globalOptions = command.parent!.parent!.opts<GlobalOptions>();
 		const {configDir} = globalOptions;

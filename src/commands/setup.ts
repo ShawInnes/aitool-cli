@@ -19,7 +19,10 @@ export async function resetConfig(configDir?: string): Promise<void> {
 	await rm(getCredentialsFilePath(configDir), {force: true});
 }
 
-async function runSetup(remoteConfig: RemoteConfig, configDir?: string): Promise<SetupResult> {
+async function runSetup(
+	remoteConfig: RemoteConfig,
+	configDir?: string,
+): Promise<SetupResult> {
 	const discovery = await fetchOidcDiscovery(remoteConfig.discoveryUrl);
 
 	const configFile = writeConfig(
@@ -33,7 +36,11 @@ async function runSetup(remoteConfig: RemoteConfig, configDir?: string): Promise
 		configDir,
 	);
 
-	return {issuer: discovery.issuer, clientId: remoteConfig.clientId, configFile: configFile};
+	return {
+		issuer: discovery.issuer,
+		clientId: remoteConfig.clientId,
+		configFile: configFile,
+	};
 }
 
 export async function runSetupCli(
@@ -64,11 +71,17 @@ export async function runSetupFromEnvironment(
 	const discoveryUrl = process.env['AITOOL_AUTH_DISCOVERY'];
 	const clientId = process.env['AITOOL_AUTH_CLIENT_ID'];
 
-	if (!discoveryUrl) throw new Error('Environment variable AITOOL_AUTH_DISCOVERY is not set.');
-	if (!clientId) throw new Error('Environment variable AITOOL_AUTH_CLIENT_ID is not set.');
+	if (!discoveryUrl)
+		throw new Error('Environment variable AITOOL_AUTH_DISCOVERY is not set.');
+	if (!clientId)
+		throw new Error('Environment variable AITOOL_AUTH_CLIENT_ID is not set.');
 
 	return runSetup(
-		{discoveryUrl, clientId, scopes: ['openid', 'profile', 'email', 'offline_access']},
+		{
+			discoveryUrl,
+			clientId,
+			scopes: ['openid', 'profile', 'email', 'offline_access'],
+		},
 		configDir,
 	);
 }

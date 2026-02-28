@@ -1,18 +1,22 @@
 # Development Rules
 
 ## Language
+
 - Always use **TypeScript**. No plain JavaScript files.
 
 ## Schema Definitions
+
 - Use **Zod** for all schema definitions, especially for data coming from external sources (API responses, user input, config files, CLI arguments).
 - Derive TypeScript types from Zod schemas using `z.infer<>` rather than defining types separately.
 
 ## Code Organization
+
 - Keep code separated into **logical files** — one concern per file.
 - Group related functionality into modules under `src/`.
 - Avoid large monolithic files; split by feature, layer, or responsibility.
 
 ## CLI Command Structure (Commander.js)
+
 - Use **Commander.js** for all CLI argument parsing. No other argument parsers.
 - **Command definitions** live in `src/cli.tsx`: `.command()`, `.description()`, `.option()`, `.action()`.
 - **Execution logic** lives in `src/commands/<name>.ts` as exported async functions.

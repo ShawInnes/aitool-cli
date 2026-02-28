@@ -22,7 +22,7 @@ SSO (OIDC) and manages local configuration for AI tool usage (e.g., Claude Code,
 Every command must work in two modes:
 
 | Mode              | Trigger                    | Output                      | Use case                   |
-|-------------------|----------------------------|-----------------------------|----------------------------|
+| ----------------- | -------------------------- | --------------------------- | -------------------------- |
 | **TUI** (default) | interactive terminal       | Ink-rendered UI             | Developer workstations     |
 | **CLI**           | `--no-tui` flag or non-TTY | Plain text / JSON to stdout | CI/CD, scripts, automation |
 
@@ -42,7 +42,7 @@ complete — every required input must be expressible as a flag.
 
 1. Detect missing config (see Config Storage below)
 2. Launch Ink-based setup wizard:
-	- Prompt: Single config URL (e.g., `https://corp.com/.well-known/aitool.json`)
+   - Prompt: Single config URL (e.g., `https://corp.com/.well-known/aitool.json`)
 3. Fetch the config document from that URL — it contains the OIDC well-known endpoint and the required client ID
 4. Fetch and validate the OIDC well-known document referenced in the config
 5. Persist config to platform-appropriate location
@@ -54,10 +54,7 @@ complete — every required input must be expressible as a flag.
 {
 	"discoveryUrl": "https://auth.corp.com/.well-known/openid-configuration",
 	"clientId": "aitool-cli",
-	"scopes": [
-		"openid",
-		"profile"
-	]
+	"scopes": ["openid", "profile"]
 }
 ```
 
@@ -117,7 +114,7 @@ Mirrors OAuth2 well-known pattern:
 ### 4. Cross-Platform Config Storage
 
 | Platform | Config Path                                       |
-|----------|---------------------------------------------------|
+| -------- | ------------------------------------------------- |
 | macOS    | `~/Library/Application Support/aitool/`           |
 | Linux    | `$XDG_CONFIG_HOME/aitool/` or `~/.config/aitool/` |
 | Windows  | `%APPDATA%\aitool\`                               |
@@ -128,11 +125,19 @@ Mirrors OAuth2 well-known pattern:
 function getConfigDir(): string {
 	switch (process.platform) {
 		case 'darwin':
-			return path.join(os.homedir(), 'Library', 'Application Support', 'aitool');
+			return path.join(
+				os.homedir(),
+				'Library',
+				'Application Support',
+				'aitool',
+			);
 		case 'win32':
 			return path.join(process.env.APPDATA ?? os.homedir(), 'aitool');
 		default:
-			return path.join(process.env.XDG_CONFIG_HOME ?? path.join(os.homedir(), '.config'), 'aitool');
+			return path.join(
+				process.env.XDG_CONFIG_HOME ?? path.join(os.homedir(), '.config'),
+				'aitool',
+			);
 	}
 }
 ```
@@ -184,7 +189,7 @@ CLI-mode flag equivalents (all interactive prompts must have a flag counterpart)
 Each component has a plain-text CLI equivalent used when `--no-tui` is active or stdout is not a TTY.
 
 | Component            | Purpose                                        | CLI-mode equivalent                             |
-|----------------------|------------------------------------------------|-------------------------------------------------|
+| -------------------- | ---------------------------------------------- | ----------------------------------------------- |
 | `<SetupWizard>`      | Multi-step first-run flow                      | Accepts `--config-url`; prints result to stdout |
 | `<DeviceCodePrompt>` | Shows user_code + verification_uri + countdown | Prints `code` and `url` as plain text / JSON    |
 | `<AuthPoller>`       | Spinner while polling token endpoint           | Silent poll; prints success or error on exit    |

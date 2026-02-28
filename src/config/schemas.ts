@@ -4,7 +4,9 @@ import {z} from 'zod';
 export const RemoteConfigSchema = z.object({
 	discoveryUrl: z.string().url(),
 	clientId: z.string().min(1),
-	scopes: z.array(z.string()).default(['openid', 'profile', 'email', 'offline_access']),
+	scopes: z
+		.array(z.string())
+		.default(['openid', 'profile', 'email', 'offline_access']),
 });
 
 export type RemoteConfig = z.infer<typeof RemoteConfigSchema>;

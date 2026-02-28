@@ -31,10 +31,15 @@ export function runConfigShow(configDir?: string): ConfigShowResult {
 	};
 }
 
-export async function runConfigGet(key: string, configDir?: string): Promise<void> {
+export async function runConfigGet(
+	key: string,
+	configDir?: string,
+): Promise<void> {
 	if (!isAllowedKey(key)) {
 		process.stderr.write(
-			`Error: "${key}" is not a readable config key. Allowed keys: ${ALLOWED_CONFIG_KEYS.join(', ')}\n`,
+			`Error: "${key}" is not a readable config key. Allowed keys: ${ALLOWED_CONFIG_KEYS.join(
+				', ',
+			)}\n`,
 		);
 		process.exit(1);
 	}
@@ -54,10 +59,16 @@ export async function runConfigGet(key: string, configDir?: string): Promise<voi
 	}
 }
 
-export async function runConfigSet(key: string, value: string, configDir?: string): Promise<void> {
+export async function runConfigSet(
+	key: string,
+	value: string,
+	configDir?: string,
+): Promise<void> {
 	if (!isAllowedKey(key)) {
 		process.stderr.write(
-			`Error: "${key}" is not a settable config key. Allowed keys: ${ALLOWED_CONFIG_KEYS.join(', ')}\n`,
+			`Error: "${key}" is not a settable config key. Allowed keys: ${ALLOWED_CONFIG_KEYS.join(
+				', ',
+			)}\n`,
 		);
 		process.exit(1);
 	}
