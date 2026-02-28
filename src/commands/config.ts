@@ -66,10 +66,13 @@ export async function runConfigSet(key: string, value: string, configDir?: strin
 
 	if (key === 'scopes') {
 		config.scopes = value.split(/[\s,]+/).filter(Boolean);
+	} else if (key === 'clientId') {
+		config.clientId = value;
 	} else {
-		config[key] = value;
+		config.discoveryUrl = value;
 	}
 
 	writeConfig(config, configDir);
-	console.log(`Set ${key} = ${value}`);
+	const displayValue = key === 'scopes' ? config.scopes.join(' ') : value;
+	console.log(`Set ${key} = ${displayValue}`);
 }
