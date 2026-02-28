@@ -1,6 +1,6 @@
 {
 	"name": "aitool-cli",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"license": "MIT",
 	"bin": "src/cli.tsx",
 	"type": "module",
