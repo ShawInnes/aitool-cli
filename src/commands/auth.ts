@@ -141,16 +141,13 @@ export async function runAuthLogin(configDir?: string): Promise<AuthLoginResult>
 
 export type TokenRefreshResult =
 	| {status: 'refreshed'}
-	| {status: 'not_needed'}
-	| {status: 'no_credentials'}
-	| {status: 'no_refresh_token'}
-	| {status: 'failed'; error: string};
+	| {status: 'not_needed'};
 
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
 
 export async function runTokenRefresh(configDir?: string): Promise<TokenRefreshResult> {
 	if (!credentialsExist(configDir)) {
-		return {status: 'no_credentials'};
+		throw new Error('Not authenticated. Run `aitool auth login` to authenticate.');
 	}
 
 	const credentials = readCredentials(configDir);
@@ -160,13 +157,11 @@ export async function runTokenRefresh(configDir?: string): Promise<TokenRefreshR
 		if (Date.now() < expiresAtMs - TOKEN_REFRESH_BUFFER_MS) {
 			return {status: 'not_needed'};
 		}
-	} else {
-		// No expiry information stored — assume refresh is not needed
-		return {status: 'not_needed'};
 	}
+	// If expiresAt is absent, fall through and attempt refresh anyway
 
 	if (!credentials.refreshToken) {
-		return {status: 'no_refresh_token'};
+		throw new Error('No refresh token available. Run `aitool auth login` to re-authenticate.');
 	}
 
 	const config = readConfig(configDir);
@@ -186,12 +181,13 @@ export async function runTokenRefresh(configDir?: string): Promise<TokenRefreshR
 			body: body.toString(),
 		});
 	} catch (err) {
-		return {status: 'failed', error: err instanceof Error ? err.message : String(err)};
+		const error = err instanceof Error ? err.message : String(err);
+		throw new Error(`Token refresh failed: ${error}. Run \`aitool auth login\` to re-authenticate.`);
 	}
 
 	if (!response.ok) {
 		const text = await response.text().catch(() => response.statusText);
-		return {status: 'failed', error: `Token refresh failed (${response.status}): ${text}`};
+		throw new Error(`Token refresh failed: ${text}. Run \`aitool auth login\` to re-authenticate.`);
 	}
 
 	const data = TokenResponseSchema.parse((await response.json()) as unknown);

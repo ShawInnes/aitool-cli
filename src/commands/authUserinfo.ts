@@ -7,14 +7,7 @@ export async function runAuthUserinfo(configDir?: string): Promise<Record<string
 		throw new Error('Not authenticated. Run `aitool auth login` first.');
 	}
 
-	const refreshResult = await runTokenRefresh(configDir);
-	if (refreshResult.status === 'no_credentials') {
-		throw new Error('Not authenticated. Run `aitool auth login` first.');
-	}
-
-	if (refreshResult.status === 'failed') {
-		throw new Error(`Token refresh failed: ${refreshResult.error}. Run \`aitool auth login\` to re-authenticate.`);
-	}
+	await runTokenRefresh(configDir);
 
 	const config = readConfig(configDir);
 	const discovery = await getDiscovery(config, configDir);
