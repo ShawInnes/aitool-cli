@@ -1,9 +1,11 @@
+import {rm} from 'node:fs/promises';
 import {
 	fetchOidcDiscovery,
 	fetchRemoteConfig,
 	loadRemoteConfigFromFile,
 } from '../config/discovery.js';
 import {type RemoteConfig} from '../config/schemas.js';
+import {getConfigFilePath, getCredentialsFilePath} from '../config/paths.js';
 import {writeConfig} from '../config/store.js';
 
 export type SetupResult = {
@@ -11,6 +13,12 @@ export type SetupResult = {
 	clientId: string;
 	configFile: string;
 };
+
+async function resetConfig(configDir?: string): Promise<void> {
+	await rm(getConfigFilePath(configDir), {force: true});
+	await rm(getCredentialsFilePath(configDir), {force: true});
+	console.log('Config reset. Starting fresh setup...');
+}
 
 async function runSetup(remoteConfig: RemoteConfig, configDir?: string): Promise<SetupResult> {
 	const discovery = await fetchOidcDiscovery(remoteConfig.discoveryUrl);
@@ -29,7 +37,12 @@ async function runSetup(remoteConfig: RemoteConfig, configDir?: string): Promise
 	return {issuer: discovery.issuer, clientId: remoteConfig.clientId, configFile: configFile};
 }
 
-export async function runSetupCli(configUrl: string, configDir?: string): Promise<SetupResult> {
+export async function runSetupCli(
+	configUrl: string,
+	configDir?: string,
+	options?: {reset?: boolean},
+): Promise<SetupResult> {
+	if (options?.reset) await resetConfig(configDir);
 	const remoteConfig = await fetchRemoteConfig(configUrl);
 	return runSetup(remoteConfig, configDir);
 }
@@ -37,12 +50,18 @@ export async function runSetupCli(configUrl: string, configDir?: string): Promis
 export async function runSetupFromFile(
 	configFile: string,
 	configDir?: string,
+	options?: {reset?: boolean},
 ): Promise<SetupResult> {
+	if (options?.reset) await resetConfig(configDir);
 	const remoteConfig = loadRemoteConfigFromFile(configFile);
 	return runSetup(remoteConfig, configDir);
 }
 
-export async function runSetupFromEnvironment(configDir?: string): Promise<SetupResult> {
+export async function runSetupFromEnvironment(
+	configDir?: string,
+	options?: {reset?: boolean},
+): Promise<SetupResult> {
+	if (options?.reset) await resetConfig(configDir);
 	const discoveryUrl = process.env['AITOOL_AUTH_DISCOVERY'];
 	const clientId = process.env['AITOOL_AUTH_CLIENT_ID'];
 

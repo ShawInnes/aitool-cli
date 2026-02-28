@@ -53,9 +53,10 @@ program
 		'--auto',
 		'load config from AITOOL_AUTH_DISCOVERY and AITOOL_AUTH_CLIENT_ID env vars',
 	)
+	.option('--reset', 'Delete config and credentials before setup')
 	.action(
 		async (
-			options: {configUrl?: string; configFile?: string; auto?: boolean},
+			options: {configUrl?: string; configFile?: string; auto?: boolean; reset?: boolean},
 			command: Command,
 		) => {
 			const globalOptions = command.parent!.opts<GlobalOptions>();
@@ -70,11 +71,11 @@ program
 				let result: SetupResult;
 
 				if (options.auto) {
-					result = await runSetupFromEnvironment(configDir);
+					result = await runSetupFromEnvironment(configDir, {reset: options.reset});
 				} else if (options.configFile) {
-					result = await runSetupFromFile(options.configFile, configDir);
+					result = await runSetupFromFile(options.configFile, configDir, {reset: options.reset});
 				} else if (options.configUrl) {
-					result = await runSetupCli(options.configUrl, configDir);
+					result = await runSetupCli(options.configUrl, configDir, {reset: options.reset});
 				} else {
 					console.error(
 						'Error: a config source is required in non-interactive mode.',
