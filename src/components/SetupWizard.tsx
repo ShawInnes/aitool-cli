@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {Box, Text, useInput} from 'ink';
 import {runSetupCli, resetConfig} from '../commands/setup.js';
 
-type Step = 'input' | 'fetching' | 'success' | 'error';
+type Step = 'resetting' | 'input' | 'fetching' | 'success' | 'error';
 
 type Props = {
 	configDir?: string;
@@ -11,14 +11,20 @@ type Props = {
 };
 
 export default function SetupWizard({configDir, onComplete, reset}: Props) {
-	const [step, setStep] = useState<Step>('input');
+	const [step, setStep] = useState<Step>(reset ? 'resetting' : 'input');
 	const [inputUrl, setInputUrl] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 
 	useEffect(() => {
-		if (reset) {
-			void resetConfig(configDir);
-		}
+		if (!reset) return;
+		resetConfig(configDir)
+			.then(() => {
+				setStep('input');
+			})
+			.catch((error: unknown) => {
+				setErrorMessage(error instanceof Error ? error.message : String(error));
+				setStep('error');
+			});
 	}, []);
 
 	useInput((input, key) => {
@@ -47,6 +53,15 @@ export default function SetupWizard({configDir, onComplete, reset}: Props) {
 			setErrorMessage(err instanceof Error ? err.message : String(err));
 			setStep('error');
 		}
+	}
+
+	if (step === 'resetting') {
+		return (
+			<Box flexDirection="column" gap={1}>
+				<Text bold>aitool — First-Run Setup</Text>
+				<Text color="yellow">Resetting config...</Text>
+			</Box>
+		);
 	}
 
 	if (step === 'input') {
