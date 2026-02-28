@@ -13,15 +13,15 @@ export function warnIfTokenExpiring(configDir?: string): void {
     return;
   }
 
-  const expiresAt = new Date(credentials.expiresAt);
-  const now = new Date();
-  const minutesUntilExpiry = Math.floor(
-    (expiresAt.getTime() - now.getTime()) / (1000 * 60)
-  );
+  const msUntilExpiry = new Date(credentials.expiresAt).getTime() - Date.now();
 
-  if (minutesUntilExpiry <= 0) {
+  if (msUntilExpiry <= 0) {
     console.error('⚠ Your token has expired. Run `aitool auth login` to re-authenticate.');
-  } else if (minutesUntilExpiry <= 5) {
+    return;
+  }
+
+  const minutesUntilExpiry = Math.ceil(msUntilExpiry / (1000 * 60));
+  if (minutesUntilExpiry <= 5) {
     console.error(
       `⚠ Your token expires in ${minutesUntilExpiry} minute${minutesUntilExpiry === 1 ? '' : 's'}. Run \`aitool auth login\` to re-authenticate.`
     );

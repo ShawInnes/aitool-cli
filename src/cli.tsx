@@ -242,10 +242,15 @@ program
 	});
 
 program.hook('preAction', (_thisCommand, actionCommand) => {
-	// Walk up to root to get global configDir option
+	// Skip warning for auth sub-commands — user is already acting on auth
+	const commandPath: string[] = [];
 	let cmd = actionCommand;
-	while (cmd.parent) cmd = cmd.parent;
+	while (cmd.parent) {
+		commandPath.unshift(cmd.name());
+		cmd = cmd.parent;
+	}
 	const configDir = cmd.opts<{configDir?: string}>().configDir;
+	if (commandPath[0] === 'auth') return;
 	warnIfTokenExpiring(configDir);
 });
 
