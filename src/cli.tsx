@@ -15,6 +15,7 @@ import {openBrowser, runAuthLogin, startDeviceAuth} from './commands/auth.js';
 import {formatRelativeTime, runAuthStatus} from './commands/authStatus.js';
 import {runAuthUserinfo} from './commands/authUserinfo.js';
 import {runAuthLogout} from './commands/authLogout.js';
+import {warnIfTokenExpiring} from './commands/tokenWarning.js';
 import SetupWizard from './components/SetupWizard.js';
 import AuthLogin from './components/AuthLogin.js';
 import AuthStatus from './components/AuthStatus.js';
@@ -239,6 +240,14 @@ program
 	.action(async () => {
 		await selfUpdate();
 	});
+
+program.hook('preAction', (_thisCommand, actionCommand) => {
+	// Walk up to root to get global configDir option
+	let cmd = actionCommand;
+	while (cmd.parent) cmd = cmd.parent;
+	const configDir = cmd.opts<{configDir?: string}>().configDir;
+	warnIfTokenExpiring(configDir);
+});
 
 program.parseAsync().catch((err: Error) => {
 	console.error(`Error: ${err.message}`);
