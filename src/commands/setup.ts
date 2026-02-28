@@ -1,0 +1,56 @@
+import {
+	fetchOidcDiscovery,
+	fetchRemoteConfig,
+	loadRemoteConfigFromFile,
+} from '../config/discovery.js';
+import {type RemoteConfig} from '../config/schemas.js';
+import {writeConfig} from '../config/store.js';
+
+export type SetupResult = {
+	issuer: string;
+	clientId: string;
+	configFile: string;
+};
+
+async function runSetup(remoteConfig: RemoteConfig, configDir?: string): Promise<SetupResult> {
+	const discovery = await fetchOidcDiscovery(remoteConfig.discoveryUrl);
+
+	const configFile = writeConfig(
+		{
+			discoveryUrl: remoteConfig.discoveryUrl,
+			clientId: remoteConfig.clientId,
+			scopes: remoteConfig.scopes,
+			cachedDiscovery: discovery,
+			discoveryFetchedAt: new Date().toISOString(),
+		},
+		configDir,
+	);
+
+	return {issuer: discovery.issuer, clientId: remoteConfig.clientId, configFile: configFile};
+}
+
+export async function runSetupCli(configUrl: string, configDir?: string): Promise<SetupResult> {
+	const remoteConfig = await fetchRemoteConfig(configUrl);
+	return runSetup(remoteConfig, configDir);
+}
+
+export async function runSetupFromFile(
+	configFile: string,
+	configDir?: string,
+): Promise<SetupResult> {
+	const remoteConfig = loadRemoteConfigFromFile(configFile);
+	return runSetup(remoteConfig, configDir);
+}
+
+export async function runSetupFromEnvironment(configDir?: string): Promise<SetupResult> {
+	const discoveryUrl = process.env['AITOOL_AUTH_DISCOVERY'];
+	const clientId = process.env['AITOOL_AUTH_CLIENT_ID'];
+
+	if (!discoveryUrl) throw new Error('Environment variable AITOOL_AUTH_DISCOVERY is not set.');
+	if (!clientId) throw new Error('Environment variable AITOOL_AUTH_CLIENT_ID is not set.');
+
+	return runSetup(
+		{discoveryUrl, clientId, scopes: ['openid', 'profile', 'email', 'offline_access']},
+		configDir,
+	);
+}

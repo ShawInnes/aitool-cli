@@ -1,7 +1,8 @@
 import {chmodSync, renameSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {version as CURRENT_VERSION} from '../package.json';
+import pkg from '../package.json';
+const CURRENT_VERSION = pkg.version;
 
 const REPO = 'ShawInnes/aitool-cli';
 const BINARY_NAME = 'aitool';
