@@ -90,7 +90,7 @@ program
 				console.log(`  issuer:   ${result.issuer}`);
 				console.log(`  clientId: ${result.clientId}`);
 			} else {
-				render(<SetupWizard configDir={configDir} />);
+				render(<SetupWizard configDir={configDir} reset={options.reset} />);
 			}
 		},
 	);

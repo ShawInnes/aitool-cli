@@ -1,18 +1,25 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {Box, Text, useInput} from 'ink';
-import {runSetupCli} from '../commands/setup.js';
+import {runSetupCli, resetConfig} from '../commands/setup.js';
 
 type Step = 'input' | 'fetching' | 'success' | 'error';
 
 type Props = {
 	configDir?: string;
 	onComplete?: () => void;
+	reset?: boolean;
 };
 
-export default function SetupWizard({configDir, onComplete}: Props) {
+export default function SetupWizard({configDir, onComplete, reset}: Props) {
 	const [step, setStep] = useState<Step>('input');
 	const [inputUrl, setInputUrl] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
+
+	useEffect(() => {
+		if (reset) {
+			void resetConfig(configDir);
+		}
+	}, []);
 
 	useInput((input, key) => {
 		if (step === 'input') {
