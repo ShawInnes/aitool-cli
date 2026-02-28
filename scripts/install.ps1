@@ -12,11 +12,12 @@ $InstallDir = if ($env:INSTALL_DIR) { $env:INSTALL_DIR } else { "$env:LOCALAPPDA
 # ── Platform detection ────────────────────────────────────────────────────────
 
 $Arch = $env:PROCESSOR_ARCHITECTURE
-$AssetName = switch ($Arch) {
-    'AMD64' { 'aitool-win-x64.exe' }
-    'ARM64' { 'aitool-win-arm64.exe' }
+$AssetBase, $ExeName = switch ($Arch) {
+    'AMD64' { 'aitool-win-x64',   'aitool-win-x64.exe' }
+    'ARM64' { 'aitool-win-arm64', 'aitool-win-arm64.exe' }
     default { throw "Unsupported architecture: $Arch" }
 }
+$ArchiveName = "$AssetBase.zip"
 
 # ── Fetch latest release tag ──────────────────────────────────────────────────
 
@@ -30,44 +31,49 @@ $Latest  = $Release.tag_name
 if (-not $Latest) { throw "Failed to determine latest version." }
 Write-Host "Latest version: $Latest"
 
-$DownloadUrl  = "https://github.com/$Repo/releases/download/$Latest/$AssetName"
-$ChecksumUrl  = "https://github.com/$Repo/releases/download/$Latest/checksums.txt"
+$DownloadUrl = "https://github.com/$Repo/releases/download/$Latest/$ArchiveName"
+$ChecksumUrl = "https://github.com/$Repo/releases/download/$Latest/checksums.txt"
 
-# ── Download binary ───────────────────────────────────────────────────────────
+# ── Download archive ──────────────────────────────────────────────────────────
 
-$TmpFile = [System.IO.Path]::GetTempFileName() + '.exe'
+$TmpDir  = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
+New-Item -ItemType Directory -Path $TmpDir -Force | Out-Null
+$TmpZip  = Join-Path $TmpDir $ArchiveName
+
 try {
-    Write-Host "Downloading $AssetName..."
-    Invoke-WebRequest -Uri $DownloadUrl -OutFile $TmpFile -Headers $Headers
+    Write-Host "Downloading $ArchiveName..."
+    Invoke-WebRequest -Uri $DownloadUrl -OutFile $TmpZip -Headers $Headers
 
     # ── Verify checksum ───────────────────────────────────────────────────────
 
     try {
         $Checksums = Invoke-RestMethod -Uri $ChecksumUrl -Headers $Headers
-        $Line      = $Checksums -split "`n" | Where-Object { $_ -match [regex]::Escape($AssetName) } | Select-Object -First 1
+        $Line      = $Checksums -split "`n" | Where-Object { $_ -match [regex]::Escape($ArchiveName) } | Select-Object -First 1
         $Expected  = ($Line -split '\s+')[0].Trim()
 
         if ($Expected) {
-            $Actual = (Get-FileHash -Path $TmpFile -Algorithm SHA256).Hash.ToLower()
+            $Actual = (Get-FileHash -Path $TmpZip -Algorithm SHA256).Hash.ToLower()
             if ($Actual -ne $Expected) {
                 throw "Checksum mismatch!`n  Expected: $Expected`n  Got:      $Actual"
             }
             Write-Host "Checksum verified."
         } else {
-            Write-Warning "No checksum found for $AssetName, skipping verification."
+            Write-Warning "No checksum found for $ArchiveName, skipping verification."
         }
     } catch [System.Net.WebException] {
         Write-Warning "Could not fetch checksums, skipping verification."
     }
 
-    # ── Install ───────────────────────────────────────────────────────────────
+    # ── Extract and install ───────────────────────────────────────────────────
+
+    Expand-Archive -Path $TmpZip -DestinationPath $TmpDir -Force
 
     if (-not (Test-Path $InstallDir)) {
         New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
     }
 
     $Dest = Join-Path $InstallDir "$BinaryName.exe"
-    Move-Item -Path $TmpFile -Destination $Dest -Force
+    Move-Item -Path (Join-Path $TmpDir $ExeName) -Destination $Dest -Force
 
     Write-Host ""
     Write-Host "Installed $BinaryName $Latest -> $Dest"
@@ -81,5 +87,5 @@ try {
 
     Write-Host "Run '$BinaryName --help' to get started."
 } finally {
-    if (Test-Path $TmpFile) { Remove-Item $TmpFile -Force -ErrorAction SilentlyContinue }
+    Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
 }

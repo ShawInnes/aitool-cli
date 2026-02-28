@@ -31,6 +31,7 @@ case "$ARCH" in
 esac
 
 ASSET_NAME="${BINARY_NAME}-${PLATFORM}-${ARCH_SUFFIX}"
+ARCHIVE_NAME="${ASSET_NAME}.tar.gz"
 
 # ── Fetch latest release tag ──────────────────────────────────────────────────
 
@@ -46,16 +47,16 @@ fi
 
 echo "Latest version: ${LATEST}"
 
-DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${LATEST}/${ASSET_NAME}"
+DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${LATEST}/${ARCHIVE_NAME}"
 CHECKSUM_URL="https://github.com/${REPO}/releases/download/${LATEST}/checksums.txt"
 
-# ── Download binary ───────────────────────────────────────────────────────────
+# ── Download archive ──────────────────────────────────────────────────────────
 
-TMP_FILE="$(mktemp)"
-trap 'rm -f "$TMP_FILE"' EXIT
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
 
-echo "Downloading ${ASSET_NAME}..."
-curl -fsSL --progress-bar "$DOWNLOAD_URL" -o "$TMP_FILE"
+echo "Downloading ${ARCHIVE_NAME}..."
+curl -fsSL --progress-bar "$DOWNLOAD_URL" -o "${TMP_DIR}/${ARCHIVE_NAME}"
 
 # ── Verify checksum ───────────────────────────────────────────────────────────
 
@@ -70,10 +71,10 @@ fi
 
 if [ -n "$HASH_CMD" ]; then
   CHECKSUMS="$(curl -fsSL "$CHECKSUM_URL")"
-  EXPECTED="$(echo "$CHECKSUMS" | grep "$ASSET_NAME" | awk '{print $1}')"
+  EXPECTED="$(echo "$CHECKSUMS" | grep "$ARCHIVE_NAME" | awk '{print $1}')"
 
   if [ -n "$EXPECTED" ]; then
-    ACTUAL="$(eval "$HASH_CMD" "$TMP_FILE" | awk '{print $1}')"
+    ACTUAL="$(eval "$HASH_CMD" "${TMP_DIR}/${ARCHIVE_NAME}" | awk '{print $1}')"
     if [ "$EXPECTED" != "$ACTUAL" ]; then
       echo "Checksum mismatch!" >&2
       echo "  Expected: $EXPECTED" >&2
@@ -82,19 +83,20 @@ if [ -n "$HASH_CMD" ]; then
     fi
     echo "Checksum verified."
   else
-    echo "Warning: could not find checksum for ${ASSET_NAME}, skipping." >&2
+    echo "Warning: could not find checksum for ${ARCHIVE_NAME}, skipping." >&2
   fi
 fi
 
-# ── Install ───────────────────────────────────────────────────────────────────
+# ── Extract and install ───────────────────────────────────────────────────────
 
-chmod +x "$TMP_FILE"
+tar xzf "${TMP_DIR}/${ARCHIVE_NAME}" -C "$TMP_DIR"
+chmod +x "${TMP_DIR}/${ASSET_NAME}"
 
 if [ -w "$INSTALL_DIR" ]; then
-  mv "$TMP_FILE" "${INSTALL_DIR}/${BINARY_NAME}"
+  mv "${TMP_DIR}/${ASSET_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
 else
   echo "Installing to ${INSTALL_DIR} (requires sudo)..."
-  sudo mv "$TMP_FILE" "${INSTALL_DIR}/${BINARY_NAME}"
+  sudo mv "${TMP_DIR}/${ASSET_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
 fi
 
 echo ""

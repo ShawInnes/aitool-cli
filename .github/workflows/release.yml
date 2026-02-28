@@ -26,16 +26,26 @@ jobs:
       - name: Build all platforms
         run: bun run build:all
 
+      - name: Package binaries
+        run: |
+          cd dist
+          tar czf aitool-darwin-arm64.tar.gz  aitool-darwin-arm64
+          tar czf aitool-darwin-x64.tar.gz    aitool-darwin-x64
+          tar czf aitool-linux-x64.tar.gz     aitool-linux-x64
+          tar czf aitool-linux-arm64.tar.gz   aitool-linux-arm64
+          zip     aitool-win-x64.zip          aitool-win-x64.exe
+          zip     aitool-win-arm64.zip         aitool-win-arm64.exe
+
       - name: Generate checksums
         run: |
           cd dist
           sha256sum \
-            aitool-darwin-arm64 \
-            aitool-darwin-x64 \
-            aitool-linux-x64 \
-            aitool-linux-arm64 \
-            aitool-win-arm64.exe \
-            aitool-win-x64.exe \
+            aitool-darwin-arm64.tar.gz \
+            aitool-darwin-x64.tar.gz \
+            aitool-linux-x64.tar.gz \
+            aitool-linux-arm64.tar.gz \
+            aitool-win-x64.zip \
+            aitool-win-arm64.zip \
             > checksums.txt
           echo "--- checksums.txt ---"
           cat checksums.txt
@@ -45,10 +55,10 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            dist/aitool-darwin-arm64
-            dist/aitool-darwin-x64
-            dist/aitool-linux-x64
-            dist/aitool-linux-arm64
-            dist/aitool-win-arm64.exe
-            dist/aitool-win-x64.exe
+            dist/aitool-darwin-arm64.tar.gz
+            dist/aitool-darwin-x64.tar.gz
+            dist/aitool-linux-x64.tar.gz
+            dist/aitool-linux-arm64.tar.gz
+            dist/aitool-win-x64.zip
+            dist/aitool-win-arm64.zip
             dist/checksums.txt
