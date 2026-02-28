@@ -1,20 +1,20 @@
 {
-	"name": "aicli",
+	"name": "aitool-cli",
 	"version": "0.0.0",
 	"license": "MIT",
-	"bin": "dist/cli.js",
+	"bin": "src/cli.tsx",
 	"type": "module",
 	"engines": {
-		"node": ">=16"
+		"node": ">=24"
 	},
 	"scripts": {
 		"dev": "bun run --watch src/cli.tsx",
-		"build:darwin-arm64": "bun build --compile --target=bun-darwin-arm64 src/cli.tsx --outfile dist/aitool-darwin-arm64",
-		"build:darwin-x64": "bun build --compile --target=bun-darwin-x64 src/cli.tsx --outfile dist/aitool-darwin-x64",
-		"build:linux-x64": "bun build --compile --target=bun-linux-x64 src/cli.tsx --outfile dist/aitool-linux-x64",
-		"build:linux-arm64": "bun build --compile --target=bun-linux-arm64 src/cli.tsx --outfile dist/aitool-linux-arm64",
-		"build:win-arm64": "bun build --compile --target=bun-windows-x64-baseline src/cli.tsx --outfile dist/aitool-win-arm64.exe",
-		"build:win-x64": "bun build --compile --target=bun-windows-x64 src/cli.tsx --outfile dist/aitool-win-x64.exe",
+		"build:darwin-arm64": "bun build --compile --minify --target=bun-darwin-arm64 src/cli.tsx --outfile dist/aitool-darwin-arm64",
+		"build:darwin-x64": "bun build --compile --minify --target=bun-darwin-x64 src/cli.tsx --outfile dist/aitool-darwin-x64",
+		"build:linux-x64": "bun build --compile --minify --target=bun-linux-x64 src/cli.tsx --outfile dist/aitool-linux-x64",
+		"build:linux-arm64": "bun build --compile --minify --target=bun-linux-arm64 src/cli.tsx --outfile dist/aitool-linux-arm64",
+		"build:win-arm64": "bun build --compile --minify --target=bun-windows-x64-baseline src/cli.tsx --outfile dist/aitool-win-arm64.exe",
+		"build:win-x64": "bun build --compile --minify --target=bun-windows-x64 src/cli.tsx --outfile dist/aitool-win-x64.exe",
 		"build:all": "bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:win-arm64 && bun run build:win-x64",
 		"test": "prettier --check . && xo && ava"
 	},
