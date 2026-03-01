@@ -13,7 +13,7 @@ Each entry has the following fields:
 | `description` | string | Brief description of the agent |
 | `opensource` | boolean | Whether the agent is open source |
 | `supported` | boolean | Whether `aitool` supports this agent |
-| `configFile` | object \| null | Platform-specific config file paths (`macLinux`, `windows`), or null if not applicable |
+| `configFile` | object \| null | Platform-specific config file paths (`mac`, `linux`, `windows`), or null if not applicable |
 
 ## Notable Findings
 

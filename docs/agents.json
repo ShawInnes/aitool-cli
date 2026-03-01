@@ -9,7 +9,8 @@
       "opensource": false,
       "supported": true,
       "configFile": {
-        "macLinux": "~/.claude/settings.json",
+        "mac": "~/.claude/settings.json",
+        "linux": "~/.claude/settings.json",
         "windows": "~/.claude/settings.json"
       }
     },
@@ -22,7 +23,8 @@
       "opensource": true,
       "supported": true,
       "configFile": {
-        "macLinux": "~/.config/opencode/opencode.json",
+        "mac": "~/.config/opencode/opencode.json",
+        "linux": "~/.config/opencode/opencode.json",
         "windows": "~/.config/opencode/opencode.json"
       }
     },
@@ -35,7 +37,8 @@
       "opensource": true,
       "supported": true,
       "configFile": {
-        "macLinux": "~/.config/crush/crush.json",
+        "mac": "~/.config/crush/crush.json",
+        "linux": "~/.config/crush/crush.json",
         "windows": "%LOCALAPPDATA%\\crush\\crush.json"
       }
     },
@@ -48,7 +51,8 @@
       "opensource": true,
       "supported": true,
       "configFile": {
-        "macLinux": "~/.continue/config.yaml",
+        "mac": "~/.continue/config.yaml",
+        "linux": "~/.continue/config.yaml",
         "windows": "%USERPROFILE%\\.continue\\config.yaml"
       }
     },
