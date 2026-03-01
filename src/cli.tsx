@@ -20,9 +20,11 @@ import {runAgentCheck} from './commands/agentCheck.js';
 import {runAgentConfigure, applyPatch} from './commands/agentConfigure.js';
 import {runAgentInstall} from './commands/agentInstall.js';
 import {runAgentList} from './commands/agentList.js';
+import {AGENT_REGISTRY} from './agents/index.js';
 import AgentCheck from './components/AgentCheck.js';
 import AgentInstall from './components/AgentInstall.js';
 import AgentConfigure from './components/AgentConfigure.js';
+import AgentSelector from './components/AgentSelector.js';
 import SetupWizard from './components/SetupWizard.js';
 import AuthLogin from './components/AuthLogin.js';
 import AuthStatus from './components/AuthStatus.js';
@@ -312,14 +314,40 @@ agentCommand
 	});
 
 agentCommand
-	.command('install <agent-id>')
-	.description('Show the installation page URL for an agent')
+	.command('install [agent-id]')
+	.description(
+		'Show the installation page URL for an agent. ' +
+			'Omit agent-id in interactive mode to select from a list.',
+	)
 	.option('--json', 'output result as JSON')
-	.action(async (agentId: string, options: {json?: boolean}) => {
+	.action(async (agentId: string | undefined, options: {json?: boolean}) => {
 		const globalOptions = (
 			agentCommand.parent as typeof program
 		).opts<GlobalOptions>();
 		const tui = !options.json && isTuiMode(globalOptions);
+
+		if (!agentId) {
+			if (!tui) {
+				const valid = AGENT_REGISTRY.map(a => a.id).join(', ');
+				console.error(`An agent-id is required. Valid options: ${valid}`);
+				process.exit(1);
+			}
+
+			let selectedId: string | undefined;
+			const {waitUntilExit: waitForSelection} = render(
+				<AgentSelector
+					agents={AGENT_REGISTRY}
+					onSelect={agent => {
+						selectedId = agent.id;
+					}}
+					title="Agent Install"
+				/>,
+			);
+			await waitForSelection();
+			if (!selectedId) return;
+			agentId = selectedId;
+		}
+
 		const result = runAgentInstall({
 			agent: agentId,
 			json: options.json,
@@ -332,16 +360,44 @@ agentCommand
 	});
 
 agentCommand
-	.command('configure <agent-id>')
+	.command('configure [agent-id]')
 	.description(
 		"Diff an agent's local config file against its bundled template. " +
-			'Shows keys that are missing, changed, or only present locally.',
+			'Shows keys that are missing, changed, or only present locally. ' +
+			'Omit agent-id in interactive mode to select from a list.',
 	)
 	.option(
 		'--config-file <path>',
 		'override the local config file path to compare',
 	)
-	.action(async (agentId: string, options: {configFile?: string}) => {
+	.action(async (agentId: string | undefined, options: {configFile?: string}) => {
+		const globalOptions = (
+			agentCommand.parent as typeof program
+		).opts<GlobalOptions>();
+		const tui = isTuiMode(globalOptions);
+
+		if (!agentId) {
+			if (!tui) {
+				const valid = AGENT_REGISTRY.map(a => a.id).join(', ');
+				console.error(`An agent-id is required. Valid options: ${valid}`);
+				process.exit(1);
+			}
+
+			let selectedId: string | undefined;
+			const {waitUntilExit: waitForSelection} = render(
+				<AgentSelector
+					agents={AGENT_REGISTRY}
+					onSelect={agent => {
+						selectedId = agent.id;
+					}}
+					title="Agent Configure"
+				/>,
+			);
+			await waitForSelection();
+			if (!selectedId) return;
+			agentId = selectedId;
+		}
+
 		const result = await runAgentConfigure({
 			agent: agentId,
 			configFile: options.configFile,
