@@ -20,6 +20,7 @@ import {runAgentCheck} from './commands/agentCheck.js';
 import {runAgentConfigure, applyPatch} from './commands/agentConfigure.js';
 import {runAgentInstall} from './commands/agentInstall.js';
 import {runAgentList} from './commands/agentList.js';
+import AgentCheck from './components/AgentCheck.js';
 import AgentInstall from './components/AgentInstall.js';
 import AgentConfigure from './components/AgentConfigure.js';
 import SetupWizard from './components/SetupWizard.js';
@@ -295,7 +296,19 @@ agentCommand
 	)
 	.option('--json', 'output results as JSON')
 	.action(async (agentId: string | undefined, options: {json?: boolean}) => {
-		await runAgentCheck({agent: agentId, json: options.json});
+		const globalOptions = (
+			agentCommand.parent as typeof program
+		).opts<GlobalOptions>();
+		const tui = !options.json && isTuiMode(globalOptions);
+		const results = await runAgentCheck({
+			agent: agentId,
+			json: options.json,
+			silent: tui,
+		});
+		if (tui) {
+			const {waitUntilExit} = render(<AgentCheck results={results} />);
+			await waitUntilExit();
+		}
 	});
 
 agentCommand

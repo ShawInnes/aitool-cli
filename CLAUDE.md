@@ -29,10 +29,56 @@ Instructions:
 
 ---
 
+## TUI Components and Rich Output
+
+Every command that produces human-readable output **must** follow this three-layer pattern:
+
+### 1. Command layer (`src/commands/*.ts`)
+
+- Returns structured data — never renders directly
+- Accepts `silent?: boolean` to suppress plain-text when a TUI component will render instead
+- Accepts `json?: boolean` for JSON output (independent of TUI mode)
+- Plain-text fallback prints if `!silent && !json`
+
+### 2. Component layer (`src/components/*.tsx`)
+
+- One Ink component per command, receiving data as props (no fetching)
+- Always includes a bold title: `<Text bold>aitool — {Command Name}</Text>`
+- Wraps content in a single-border box: `<Box borderStyle="single" borderColor="gray" paddingX={1}>`
+- Calls `useApp().exit()` via `useEffect` + `setTimeout(..., 100)` to flush output and return to the shell
+- Never imports `React` directly (project rule)
+
+### 3. CLI layer (`src/cli.tsx`)
+
+- Detects TUI mode: `const tui = !options.json && isTuiMode(globalOptions)`
+- Calls the command with `silent: tui` to avoid double-printing
+- If `tui`: renders component and `await waitUntilExit()`
+- If not `tui`: command already printed plain-text or JSON
+
+### Color conventions
+
+| Situation                   | Color    | Example                                       |
+| --------------------------- | -------- | --------------------------------------------- |
+| Success / Installed / Valid | `green`  | `<Text color="green">✓ installed</Text>`      |
+| Error / Not Found / Expired | `red`    | `<Text color="red">✗ not installed</Text>`    |
+| Warning / Expiring soon     | `yellow` | `<Text color="yellow">⚠ expiring soon</Text>` |
+| Labels / Metadata           | `gray`   | `<Text color="gray">version</Text>`           |
+| URLs / Emphasized values    | `cyan`   | `<Text color="cyan">https://…</Text>`         |
+| Section titles              | `bold`   | `<Text bold>aitool — Agent Check</Text>`      |
+
+### Existing examples
+
+- `AgentCheck` — colored ✓/✗ per agent, bordered list
+- `AgentInstall` — install URL + per-platform commands
+- `AgentConfigure` — diff tree with color-coded changes
+- `AuthStatus` — token validity with green/red/yellow indicators
+
+---
+
 ## Essential Commands
 
 | Purpose              | Command             |
-|----------------------|---------------------|
+| -------------------- | ------------------- |
 | Dev (watch mode)     | `bun run dev`       |
 | Run directly         | `bun run start`     |
 | Build all platforms  | `bun run build:all` |
@@ -73,7 +119,7 @@ docs/AGENTS.md        # AI agent registry table (unrelated to this file)
 ### Config storage paths
 
 | Platform | Path                                              |
-|----------|---------------------------------------------------|
+| -------- | ------------------------------------------------- |
 | macOS    | `~/Library/Application Support/aitool/`           |
 | Linux    | `$XDG_CONFIG_HOME/aitool/` or `~/.config/aitool/` |
 | Windows  | `%APPDATA%\aitool\`                               |
@@ -99,4 +145,3 @@ After completing any implementation (new feature, bug fix, refactor), create a g
 - **Verbose logging**: `--verbose` or `AITOOL_VERBOSE=1`; output goes to `stderr`.
 - **`src/app.tsx`**: Unused scaffolding placeholder — ignore it.
 - **Token refresh buffer**: `runTokenRefresh` refreshes 30 min before expiry (`TOKEN_REFRESH_BUFFER_MS`).
-

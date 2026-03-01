@@ -5,6 +5,8 @@ export type AgentCheckOptions = {
 	agent?: string;
 	/** Emit results as JSON instead of human-readable text. */
 	json?: boolean;
+	/** When true, suppress plain-text console output (caller will render a TUI). */
+	silent?: boolean;
 };
 
 export type AgentCheckSummary = {
@@ -27,8 +29,8 @@ export type AgentCheckSummary = {
  */
 export async function runAgentCheck(
 	options: AgentCheckOptions = {},
-): Promise<void> {
-	const {agent: agentId, json = false} = options;
+): Promise<AgentCheckSummary[]> {
+	const {agent: agentId, json = false, silent = false} = options;
 
 	let agents: Agent[];
 	if (agentId) {
@@ -56,19 +58,22 @@ export async function runAgentCheck(
 
 	if (json) {
 		console.log(JSON.stringify(results, null, 2));
-		return;
+		return results;
 	}
 
-	// Human-readable output
-	for (const r of results) {
-		const status = r.installed ? '✓ installed' : '✗ not installed';
-		const detail = r.version
-			? ` (${r.version})`
-			: r.path
-				? ` (${r.path})`
-				: r.error
-					? ` — ${r.error}`
-					: '';
-		console.log(`${r.displayName.padEnd(14)} ${status}${detail}`);
+	if (!silent) {
+		for (const r of results) {
+			const status = r.installed ? '✓ installed' : '✗ not installed';
+			const detail = r.version
+				? ` (${r.version})`
+				: r.path
+					? ` (${r.path})`
+					: r.error
+						? ` — ${r.error}`
+						: '';
+			console.log(`${r.displayName.padEnd(14)} ${status}${detail}`);
+		}
 	}
+
+	return results;
 }
