@@ -37,7 +37,7 @@ export type AgentConfigureResult = {
 };
 
 /** Recursively parse a jsondiffpatch delta into our display-friendly DiffNode tree. */
-function parseDelta(delta: unknown): DiffNode | undefined {
+export function parseDelta(delta: unknown): DiffNode | undefined {
 	if (delta === null || delta === undefined) return undefined;
 
 	// Array-encoded leaf nodes
@@ -92,7 +92,7 @@ function parseDelta(delta: unknown): DiffNode | undefined {
 }
 
 /** Count leaf-level changes recursively. */
-function countChanges(node: DiffNode): {
+export function countChanges(node: DiffNode): {
 	added: number;
 	changed: number;
 	removed: number;
