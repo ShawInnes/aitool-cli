@@ -1,6 +1,7 @@
 // src/components/AgentConfigure.tsx
-import {Box, Text} from 'ink';
-import {Badge} from '@inkjs/ui';
+import {useState} from 'react';
+import {Box, Text, useApp} from 'ink';
+import {Badge, ConfirmInput, StatusMessage} from '@inkjs/ui';
 import {
 	type AgentConfigureResult,
 	type DiffNode,
@@ -8,6 +9,7 @@ import {
 
 type Props = {
 	readonly result: AgentConfigureResult;
+	readonly onPatch: () => void;
 };
 
 /** Truncate a JSON value to a readable single-line string. */
@@ -131,7 +133,7 @@ function DiffEntry({
 				{node.items.map((item, i) => (
 					<DiffEntry
 						// eslint-disable-next-line react/no-array-index-key
-						key={i}
+						key={`array-item-${i}`}
 						entryKey={String(i)}
 						node={item}
 						indent={indent + '  '}
@@ -164,24 +166,41 @@ function SummaryBadge({
 	);
 }
 
-export default function AgentConfigure({result}: Props) {
+export default function AgentConfigure({result, onPatch}: Props) {
+	const {exit} = useApp();
 	const {agent, templatePath, localConfigPath, diff, counts} = result;
 	const hasDiff = diff !== undefined;
+
+	type PatchState = 'idle' | 'confirming' | 'patched' | 'cancelled';
+	const [patchState, setPatchState] = useState<PatchState>(
+		hasDiff ? 'confirming' : 'idle',
+	);
+
+	function handleConfirm() {
+		onPatch();
+		setPatchState('patched');
+		exit();
+	}
+
+	function handleCancel() {
+		setPatchState('cancelled');
+		exit();
+	}
 
 	return (
 		<Box flexDirection="column" gap={1}>
 			{/* Header */}
 			<Box flexDirection="column">
 				<Box gap={1}>
-					<Text color="gray">{'agent'}</Text>
+					<Text color="gray">agent</Text>
 					<Text bold>{agent.displayName}</Text>
 				</Box>
 				<Box gap={1}>
-					<Text color="gray">{'template'}</Text>
+					<Text color="gray">template</Text>
 					<Text>{templatePath}</Text>
 				</Box>
 				<Box gap={1}>
-					<Text color="gray">{'local'}</Text>
+					<Text color="gray">local</Text>
 					<Text>{localConfigPath}</Text>
 				</Box>
 			</Box>
@@ -203,13 +222,31 @@ export default function AgentConfigure({result}: Props) {
 				</Box>
 			)}
 
-			{/* Summary */}
+			{/* Summary badges */}
 			{hasDiff && (
 				<Box gap={2}>
 					<SummaryBadge label="missing" count={counts.added} color="green" />
 					<SummaryBadge label="changed" count={counts.changed} color="yellow" />
 					<SummaryBadge label="local-only" count={counts.removed} color="red" />
 				</Box>
+			)}
+
+			{/* Confirm prompt / result */}
+			{patchState === 'confirming' && (
+				<Box flexDirection="column" gap={1}>
+					<Text>Apply template changes to local config?</Text>
+					<ConfirmInput onConfirm={handleConfirm} onCancel={handleCancel} />
+				</Box>
+			)}
+
+			{patchState === 'patched' && (
+				<StatusMessage variant="success">
+					{`Patched ${localConfigPath}`}
+				</StatusMessage>
+			)}
+
+			{patchState === 'cancelled' && (
+				<StatusMessage variant="info">No changes applied.</StatusMessage>
 			)}
 		</Box>
 	);

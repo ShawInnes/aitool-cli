@@ -17,7 +17,7 @@ import {runAuthUserinfo} from './commands/authUserinfo.js';
 import {runAuthLogout} from './commands/authLogout.js';
 import {warnIfTokenExpiring} from './commands/tokenWarning.js';
 import {runAgentCheck} from './commands/agentCheck.js';
-import {runAgentConfigure} from './commands/agentConfigure.js';
+import {runAgentConfigure, applyPatch} from './commands/agentConfigure.js';
 import {runAgentList} from './commands/agentList.js';
 import AgentConfigure from './components/AgentConfigure.js';
 import SetupWizard from './components/SetupWizard.js';
@@ -311,11 +311,17 @@ agentCommand
 			agent: agentId,
 			configFile: options.configFile,
 		});
-		const {waitUntilExit} = render(<AgentConfigure result={result} />);
+		const {waitUntilExit} = render(
+			<AgentConfigure
+				result={result}
+				onPatch={() => {
+					if (result.rawDelta) {
+						applyPatch(result.localConfigPath, result.rawDelta);
+					}
+				}}
+			/>,
+		);
 		await waitUntilExit();
-		if (result.counts.added > 0 || result.counts.changed > 0) {
-			process.exit(1);
-		}
 	});
 
 program.hook('preAction', (_thisCommand, actionCommand) => {
