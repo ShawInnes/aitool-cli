@@ -3,6 +3,16 @@
 > A CLI tool built with [Ink](https://github.com/vadimdemedes/ink) and compiled to standalone binaries
 > via [Bun](https://bun.sh).
 
+## Quickstart
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ShawInnes/aitool-cli/main/scripts/install.sh | sh
+
+aitool agent check
+```
+
+![Agent Check](docs/images/agent-check.png)
+
 ## Install
 
 **macOS / Linux:**
