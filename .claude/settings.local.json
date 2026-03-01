@@ -1,5 +1,9 @@
 {
-	"permissions": {
-		"allow": ["Bash(*)", "Skill(commit-commands:*)"]
-	}
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Skill(commit-commands:*)",
+      "WebSearch"
+    ]
+  }
 }
