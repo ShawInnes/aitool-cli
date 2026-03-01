@@ -1,5 +1,6 @@
 // src/components/AgentInstall.tsx
-import {Box, Text} from 'ink';
+import {useEffect} from 'react';
+import {Box, Text, useApp} from 'ink';
 import {type AgentInstallResult} from '../commands/agentInstall.js';
 
 type Props = {
@@ -7,7 +8,17 @@ type Props = {
 };
 
 export default function AgentInstall({result}: Props) {
+	const {exit} = useApp();
 	const {displayName, installUrl, url} = result;
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			exit();
+		}, 100);
+		return () => {
+			clearTimeout(timer);
+		};
+	}, [exit]);
 
 	return (
 		<Box flexDirection="column" gap={1}>
