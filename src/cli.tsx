@@ -370,48 +370,81 @@ agentCommand
 		'--config-file <path>',
 		'override the local config file path to compare',
 	)
-	.action(async (agentId: string | undefined, options: {configFile?: string}) => {
-		const globalOptions = (
-			agentCommand.parent as typeof program
-		).opts<GlobalOptions>();
-		const tui = isTuiMode(globalOptions);
+	.option('--yes', 'apply the template without prompting for confirmation')
+	.option('--dry-run', 'show the diff without applying any changes')
+	.action(
+		async (
+			agentId: string | undefined,
+			options: {configFile?: string; yes?: boolean; dryRun?: boolean},
+		) => {
+			const globalOptions = (
+				agentCommand.parent as typeof program
+			).opts<GlobalOptions>();
+			const tui = isTuiMode(globalOptions);
 
-		if (!agentId) {
-			if (!tui) {
-				const valid = AGENT_REGISTRY.map(a => a.id).join(', ');
-				console.error(`An agent-id is required. Valid options: ${valid}`);
-				process.exit(1);
+			if (!agentId) {
+				if (!tui) {
+					const valid = AGENT_REGISTRY.map(a => a.id).join(', ');
+					console.error(`An agent-id is required. Valid options: ${valid}`);
+					process.exit(1);
+				}
+
+				let selectedId: string | undefined;
+				const {waitUntilExit: waitForSelection} = render(
+					<AgentSelector
+						agents={AGENT_REGISTRY}
+						onSelect={agent => {
+							selectedId = agent.id;
+						}}
+						title="Agent Configure"
+					/>,
+				);
+				await waitForSelection();
+				if (!selectedId) return;
+				agentId = selectedId;
 			}
 
-			let selectedId: string | undefined;
-			const {waitUntilExit: waitForSelection} = render(
-				<AgentSelector
-					agents={AGENT_REGISTRY}
-					onSelect={agent => {
-						selectedId = agent.id;
+			const result = await runAgentConfigure({
+				agent: agentId,
+				configFile: options.configFile,
+			});
+
+			if (options.dryRun) {
+				if (!result.diff) {
+					console.log('No changes — local config matches template.');
+				} else {
+					const {added, changed, removed} = result.counts;
+					if (added) console.log(`  ${added} missing from local`);
+					if (changed) console.log(`  ${changed} changed`);
+					if (removed) console.log(`  ${removed} local-only`);
+					console.log('Dry run — no changes applied.');
+				}
+
+				return;
+			}
+
+			if (options.yes) {
+				if (!result.diff) {
+					console.log('No changes — local config already matches template.');
+					return;
+				}
+
+				applyPatch(result.localConfigPath, result.template);
+				console.log(`Patched ${result.localConfigPath}`);
+				return;
+			}
+
+			const {waitUntilExit} = render(
+				<AgentConfigure
+					result={result}
+					onPatch={() => {
+						applyPatch(result.localConfigPath, result.template);
 					}}
-					title="Agent Configure"
 				/>,
 			);
-			await waitForSelection();
-			if (!selectedId) return;
-			agentId = selectedId;
-		}
-
-		const result = await runAgentConfigure({
-			agent: agentId,
-			configFile: options.configFile,
-		});
-		const {waitUntilExit} = render(
-			<AgentConfigure
-				result={result}
-				onPatch={() => {
-					applyPatch(result.localConfigPath, result.template);
-				}}
-			/>,
-		);
-		await waitUntilExit();
-	});
+			await waitUntilExit();
+		},
+	);
 
 program.hook('preAction', (_thisCommand, actionCommand) => {
 	// Skip warning for auth sub-commands — user is already acting on auth
