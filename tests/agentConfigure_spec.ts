@@ -1,8 +1,17 @@
 // tests/agentConfigure_spec.ts
 import {describe, expect, test, beforeEach, afterEach} from 'bun:test';
-import {mkdtempSync, rmSync, writeFileSync, readFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {
+	mkdtempSync,
+	rmSync,
+	writeFileSync,
+	readFileSync,
+	copyFileSync,
+} from 'node:fs';
+import {join, dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {tmpdir} from 'node:os';
+
+const thisDir = dirname(fileURLToPath(import.meta.url));
 import * as jsondiffpatch from 'jsondiffpatch';
 import {type Delta} from 'jsondiffpatch';
 import {
@@ -350,5 +359,160 @@ describe('diff → parseDelta round-trip', () => {
 		expect(total.changed).toBe(1); // a: 1 → 10
 		expect(total.added).toBe(1); // d: present in local, not template
 		expect(total.removed).toBe(1); // c: present in template, not local
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Fixture-based tests: claude-template.json vs claude-target.json
+//
+// template has two top-level keys that target lacks:
+//   • companyAnnouncements  — an array
+//   • env                   — an object with 8 env-var entries
+// All other keys ($schema, effortLevel, enabledPlugins, permissions, model,
+// attribution) are identical.
+// ---------------------------------------------------------------------------
+
+describe('claude-template.json vs claude-target.json', () => {
+	const templatePath = join(thisDir, 'agents', 'claude-template.json');
+	const targetPath = join(thisDir, 'agents', 'claude-target.json');
+
+	const template = JSON.parse(readFileSync(templatePath, 'utf8')) as Record<
+		string,
+		unknown
+	>;
+	const target = JSON.parse(readFileSync(targetPath, 'utf8')) as Record<
+		string,
+		unknown
+	>;
+
+	const instance = jsondiffpatch.create({});
+
+	// diff(template, target): describes how target differs from template
+	const delta = instance.diff(template, target);
+
+	test('diff is non-null (files differ)', () => {
+		expect(delta).toBeDefined();
+	});
+
+	test('diff only touches companyAnnouncements and env', () => {
+		const node = parseDelta(delta);
+		expect(node?.kind).toBe('object');
+		if (node?.kind !== 'object') return;
+
+		const changedKeys = Object.keys(node.children).sort();
+		expect(changedKeys).toEqual(['companyAnnouncements', 'env']);
+	});
+
+	test('companyAnnouncements is classified as removed (present in template, absent in target)', () => {
+		const node = parseDelta(delta);
+		if (node?.kind !== 'object') return;
+
+		const entry = node.children['companyAnnouncements'];
+		expect(entry?.kind).toBe('removed');
+		if (entry?.kind === 'removed') {
+			expect(Array.isArray(entry.value)).toBe(true);
+		}
+	});
+
+	test('env is classified as removed (present in template, absent in target)', () => {
+		const node = parseDelta(delta);
+		if (node?.kind !== 'object') return;
+
+		const entry = node.children['env'];
+		expect(entry?.kind).toBe('removed');
+		if (entry?.kind === 'removed') {
+			expect(entry.value).toEqual(template['env']);
+		}
+	});
+
+	test('countChanges reports 2 removed, 0 added, 0 changed', () => {
+		const node = parseDelta(delta);
+		if (node?.kind !== 'object') return;
+
+		const counts = Object.values(node.children).reduce(
+			(acc, child) => {
+				const c = countChanges(child);
+				return {
+					added: acc.added + c.added,
+					changed: acc.changed + c.changed,
+					removed: acc.removed + c.removed,
+				};
+			},
+			{added: 0, changed: 0, removed: 0},
+		);
+
+		expect(counts).toEqual({added: 0, changed: 0, removed: 2});
+	});
+
+	describe('applyPatch: bring target up to template', () => {
+		let tmpDir: string;
+		let workingCopy: string;
+
+		beforeEach(() => {
+			tmpDir = mkdtempSync(join(tmpdir(), 'aitool-claude-test-'));
+			workingCopy = join(tmpDir, 'claude-target.json');
+			copyFileSync(targetPath, workingCopy);
+		});
+
+		afterEach(() => {
+			rmSync(tmpDir, {recursive: true, force: true});
+		});
+
+		test('patching target with diff(target, template) produces template', () => {
+			// patch(obj, diff(obj, desired)) = desired
+			const upgradeDelta = instance.diff(target, template);
+			applyPatch(workingCopy, upgradeDelta!);
+
+			const result = JSON.parse(readFileSync(workingCopy, 'utf8'));
+			expect(result).toEqual(template);
+		});
+
+		test('patched file contains companyAnnouncements from template', () => {
+			const upgradeDelta = instance.diff(target, template);
+			applyPatch(workingCopy, upgradeDelta!);
+
+			const result = JSON.parse(readFileSync(workingCopy, 'utf8')) as Record<
+				string,
+				unknown
+			>;
+			expect(result['companyAnnouncements']).toEqual(
+				template['companyAnnouncements'],
+			);
+		});
+
+		test('patched file contains env block from template', () => {
+			const upgradeDelta = instance.diff(target, template);
+			applyPatch(workingCopy, upgradeDelta!);
+
+			const result = JSON.parse(readFileSync(workingCopy, 'utf8')) as Record<
+				string,
+				unknown
+			>;
+			expect(result['env']).toEqual(template['env']);
+		});
+
+		test('patched file preserves keys that were already correct in target', () => {
+			const upgradeDelta = instance.diff(target, template);
+			applyPatch(workingCopy, upgradeDelta!);
+
+			const result = JSON.parse(readFileSync(workingCopy, 'utf8')) as Record<
+				string,
+				unknown
+			>;
+			expect(result['model']).toBe(target['model']);
+			expect(result['effortLevel']).toBe(target['effortLevel']);
+			expect(result['enabledPlugins']).toEqual(target['enabledPlugins']);
+			expect(result['permissions']).toEqual(target['permissions']);
+			expect(result['attribution']).toEqual(target['attribution']);
+		});
+
+		test('patched file is written as formatted JSON with a trailing newline', () => {
+			const upgradeDelta = instance.diff(target, template);
+			applyPatch(workingCopy, upgradeDelta!);
+
+			const raw = readFileSync(workingCopy, 'utf8');
+			expect(raw.endsWith('\n')).toBe(true);
+			expect(raw.split('\n').length).toBeGreaterThan(1);
+		});
 	});
 });
