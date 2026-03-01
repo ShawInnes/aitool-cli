@@ -1,7 +1,8 @@
 // src/components/AgentConfigure.tsx
 import {useState} from 'react';
 import {Box, Text, useApp} from 'ink';
-import {Badge, ConfirmInput, StatusMessage} from '@inkjs/ui';
+import {Badge, StatusMessage} from '@inkjs/ui';
+import ConfirmSelector from './ConfirmSelector.js';
 import {
 	type AgentConfigureResult,
 	type DiffNode,
@@ -235,7 +236,7 @@ export default function AgentConfigure({result, onPatch}: Props) {
 			{patchState === 'confirming' && (
 				<Box flexDirection="column" gap={1}>
 					<Text>Apply template changes to local config?</Text>
-					<ConfirmInput onConfirm={handleConfirm} onCancel={handleCancel} />
+					<ConfirmSelector onConfirm={handleConfirm} onCancel={handleCancel} />
 				</Box>
 			)}
 
