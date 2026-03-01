@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {Box, Text, useInput} from 'ink';
 import {runSetupCli, resetConfig} from '../commands/setup.js';
 
@@ -10,7 +10,11 @@ type Props = {
 	readonly forceReset?: boolean;
 };
 
-export default function SetupWizard({configDir, onComplete, forceReset}: Props) {
+export default function SetupWizard({
+	configDir,
+	onComplete,
+	forceReset,
+}: Props) {
 	const [step, setStep] = useState<Step>(forceReset ? 'resetting' : 'input');
 	const [inputUrl, setInputUrl] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');

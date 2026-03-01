@@ -20,7 +20,10 @@
 		"release": "npm version patch --message 'chore: release v%s'",
 		"release:minor": "npm version minor --message 'chore: release v%s'",
 		"release:major": "npm version major --message 'chore: release v%s'",
-		"test": "prettier --check src/ && xo src/"
+		"lint:prettier": "prettier --check src/",
+		"lint:xo": "xo src/",
+		"lint": "bun run lint:prettier && bun run lint:xo",
+		"test": "bun test tests/"
 	},
 	"files": [
 		"dist"
@@ -58,7 +61,8 @@
 				"n/prefer-global/process": "off",
 				"@typescript-eslint/naming-convention": "off",
 				"unicorn/filename-case": "off",
-				"unicorn/no-process-exit": "off"
+				"unicorn/no-process-exit": "off",
+				"react/react-in-jsx-scope": "off"
 			}
 		}
 	],

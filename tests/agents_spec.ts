@@ -1,9 +1,9 @@
 // test-agents.ts
 import {describe, expect, test} from 'bun:test';
-import {ClaudeCodeChecker} from './src/agents/claudeCode.js';
-import {OpenCodeChecker} from './src/agents/openCode.js';
-import {AGENT_REGISTRY} from './src/agents/index.js';
-import {type Executor} from './src/agents/agent.js';
+import {ClaudeCodeChecker} from '../src/agents/claudeCode.js';
+import {OpenCodeChecker} from '../src/agents/openCode.js';
+import {AGENT_REGISTRY} from '../src/agents/index.js';
+import {type Executor} from '../src/agents/agent.js';
 
 // ─── ClaudeCodeChecker ──────────────────────────────────────────────────────
 
@@ -15,7 +15,7 @@ describe('ClaudeCodeChecker', () => {
 	});
 
 	test('returns installed:true with version when claude --version succeeds', async () => {
-		const exec: Executor = (cmd) => {
+		const exec: Executor = cmd => {
 			if (cmd === 'claude --version') return 'claude 1.2.3\n';
 			throw new Error('not found');
 		};
@@ -25,7 +25,7 @@ describe('ClaudeCodeChecker', () => {
 	});
 
 	test('falls back to which and returns path when --version fails', async () => {
-		const exec: Executor = (cmd) => {
+		const exec: Executor = cmd => {
 			if (cmd === 'which claude') return '/usr/local/bin/claude\n';
 			throw new Error('not found');
 		};
@@ -55,7 +55,7 @@ describe('OpenCodeChecker', () => {
 	});
 
 	test('returns installed:true with version when opencode --version succeeds', async () => {
-		const exec: Executor = (cmd) => {
+		const exec: Executor = cmd => {
 			if (cmd === 'opencode --version') return 'opencode 0.5.0\n';
 			throw new Error('not found');
 		};
@@ -65,7 +65,7 @@ describe('OpenCodeChecker', () => {
 	});
 
 	test('falls back to which and returns path when --version fails', async () => {
-		const exec: Executor = (cmd) => {
+		const exec: Executor = cmd => {
 			if (cmd === 'which opencode') return '/usr/local/bin/opencode\n';
 			throw new Error('not found');
 		};

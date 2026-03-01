@@ -1,4 +1,3 @@
-// src/commands/agentCheck.ts
 import {AGENT_REGISTRY, type AgentChecker} from '../agents/index.js';
 
 export type AgentCheckOptions = {

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import React from 'react';
 import {render} from 'ink';
 import {Command} from 'commander';
+// @ts-expect-error json reference
 import pkg from '../package.json';
 import {selfUpdate} from './update.js';
 import {

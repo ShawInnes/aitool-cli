@@ -269,7 +269,6 @@ git commit -m "feat(agent): add agent registry"
 
 ```typescript
 // test-agents.ts
-import test from 'ava';
 import {execSync} from 'node:child_process';
 import {ClaudeCodeChecker} from './src/agents/claudeCode.js';
 import {OpenCodeChecker} from './src/agents/openCode.js';
