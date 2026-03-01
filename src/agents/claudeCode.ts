@@ -1,4 +1,6 @@
 // src/agents/claudeCode.ts
+import {homedir} from 'node:os';
+import {join} from 'node:path';
 import {execSync as nodeExecSync} from 'node:child_process';
 import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
 
@@ -23,6 +25,12 @@ export class ClaudeCodeAgent implements Agent {
 	readonly id = 'claude-code';
 	readonly displayName = 'Claude Code';
 	readonly url = 'https://claude.ai/code';
+	readonly templatePath = 'claudeCode.json';
+
+	defaultConfigFilePath(): string {
+		// Same path on all platforms: ~/.claude/settings.json
+		return join(homedir(), '.claude', 'settings.json');
+	}
 
 	private readonly exec: Executor;
 

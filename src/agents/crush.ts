@@ -1,4 +1,6 @@
 // src/agents/crush.ts
+import {homedir} from 'node:os';
+import {join} from 'node:path';
 import {execSync as nodeExecSync} from 'node:child_process';
 import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
 
@@ -23,6 +25,19 @@ export class CrushAgent implements Agent {
 	readonly displayName = 'Crush';
 	readonly url = 'https://charm.land';
 	readonly githubUrl = 'https://github.com/charmbracelet/crush';
+	readonly templatePath = 'crush.json';
+
+	defaultConfigFilePath(): string {
+		// Windows: %LOCALAPPDATA%\crush\crush.json
+		// macOS / Linux: ~/.config/crush/crush.json
+		if (process.platform === 'win32') {
+			const localAppData =
+				process.env['LOCALAPPDATA'] ?? join(homedir(), 'AppData', 'Local');
+			return join(localAppData, 'crush', 'crush.json');
+		}
+
+		return join(homedir(), '.config', 'crush', 'crush.json');
+	}
 
 	private readonly exec: Executor;
 

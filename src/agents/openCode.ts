@@ -1,4 +1,6 @@
 // src/agents/openCode.ts
+import {homedir} from 'node:os';
+import {join} from 'node:path';
 import {execSync as nodeExecSync} from 'node:child_process';
 import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
 
@@ -24,6 +26,12 @@ export class OpenCodeAgent implements Agent {
 	readonly displayName = 'Open Code';
 	readonly url = 'https://opencode.ai';
 	readonly githubUrl = 'https://github.com/opencode-ai/opencode';
+	readonly templatePath = 'opencode.json';
+
+	defaultConfigFilePath(): string {
+		// ~/.config/opencode/opencode.json on all platforms
+		return join(homedir(), '.config', 'opencode', 'opencode.json');
+	}
 
 	private readonly exec: Executor;
 

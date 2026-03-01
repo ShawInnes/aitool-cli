@@ -17,6 +17,7 @@ import {runAuthUserinfo} from './commands/authUserinfo.js';
 import {runAuthLogout} from './commands/authLogout.js';
 import {warnIfTokenExpiring} from './commands/tokenWarning.js';
 import {runAgentCheck} from './commands/agentCheck.js';
+import {runAgentConfigure} from './commands/agentConfigure.js';
 import {runAgentList} from './commands/agentList.js';
 import SetupWizard from './components/SetupWizard.js';
 import AuthLogin from './components/AuthLogin.js';
@@ -292,6 +293,20 @@ agentCommand
 	.option('--json', 'output results as JSON')
 	.action(async (agentId: string | undefined, options: {json?: boolean}) => {
 		await runAgentCheck({agent: agentId, json: options.json});
+	});
+
+agentCommand
+	.command('configure <agent-id>')
+	.description(
+		"Diff an agent's local config file against its bundled template. " +
+			'Shows keys that are missing, changed, or only present locally.',
+	)
+	.option(
+		'--config-file <path>',
+		'override the local config file path to compare',
+	)
+	.action(async (agentId: string, options: {configFile?: string}) => {
+		await runAgentConfigure({agent: agentId, configFile: options.configFile});
 	});
 
 program.hook('preAction', (_thisCommand, actionCommand) => {

@@ -82,6 +82,16 @@ Files: `config.json` and `credentials.json`, both `0o600`. Override with `--conf
 
 ---
 
+## Git Commits
+
+After completing any implementation (new feature, bug fix, refactor), create a git commit automatically:
+
+- Stage all modified and new files relevant to the change
+- Write a concise commit message following the pattern: `type: short description` (e.g. `feat: add agent configure command`)
+- Do **not** wait to be asked — commit as the final step of every implementation task
+
+---
+
 ## Gotchas
 
 - **`.js` imports**: TypeScript source uses `.js` extensions in all imports (ESM requirement).
