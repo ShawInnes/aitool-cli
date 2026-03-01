@@ -2,7 +2,10 @@
 import {execSync as nodeExecSync} from 'node:child_process';
 import {type AgentCheckResult, type AgentChecker} from './agent.js';
 
-type Executor = (cmd: string, opts: {stdio: string; encoding: string}) => string;
+type Executor = (
+	cmd: string,
+	opts: {stdio: string; encoding: string},
+) => string;
 
 /**
  * Checks whether Open Code (opencode-ai terminal coding agent) is installed.

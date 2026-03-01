@@ -2,7 +2,10 @@
 import {execSync as nodeExecSync} from 'node:child_process';
 import {type AgentCheckResult, type AgentChecker} from './agent.js';
 
-type Executor = (cmd: string, opts: {stdio: string; encoding: string}) => string;
+type Executor = (
+	cmd: string,
+	opts: {stdio: string; encoding: string},
+) => string;
 
 /**
  * Checks whether Claude Code (Anthropic's AI coding CLI) is installed.
