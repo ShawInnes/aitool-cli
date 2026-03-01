@@ -1,5 +1,5 @@
 // src/commands/agentConfigure.ts
-import {readFileSync, writeFileSync, existsSync} from 'node:fs';
+import {copyFileSync, readFileSync, writeFileSync, existsSync} from 'node:fs';
 import * as jsondiffpatch from 'jsondiffpatch';
 import {type Delta} from 'jsondiffpatch';
 import {AGENT_REGISTRY, type Agent} from '../agents/index.js';
@@ -24,12 +24,14 @@ export type AgentConfigureResult = {
 	agent: {id: string; displayName: string};
 	templatePath: string;
 	localConfigPath: string;
+	/** The full parsed template — written verbatim to disk by applyPatch(). */
+	template: Record<string, unknown>;
 	/** undefined when files are identical */
 	diff: Record<string, DiffNode> | undefined;
 	/** Counts for the summary line */
 	counts: {added: number; changed: number; removed: number};
 	/**
-	 * Raw jsondiffpatch delta — passed to applyPatch() to write changes.
+	 * Raw jsondiffpatch delta — kept for reference / display only.
 	 * undefined when files are identical.
 	 */
 	rawDelta: Delta | undefined;
@@ -221,6 +223,7 @@ export async function runAgentConfigure(
 			agent: {id: agent.id, displayName: agent.displayName},
 			templatePath: agent.templatePath!,
 			localConfigPath: localPath,
+			template,
 			diff: undefined,
 			counts: {added: 0, changed: 0, removed: 0},
 			rawDelta: undefined,
@@ -248,6 +251,7 @@ export async function runAgentConfigure(
 		agent: {id: agent.id, displayName: agent.displayName},
 		templatePath: agent.templatePath!,
 		localConfigPath: localPath,
+		template,
 		diff,
 		counts,
 		rawDelta,
@@ -255,25 +259,17 @@ export async function runAgentConfigure(
 }
 
 /**
- * Applies a jsondiffpatch delta to the local config file, writing the result
- * back to disk. The delta produced by diff(template, local) brings `local`
- * toward `template` — i.e. missing/changed keys are updated to match the
- * template values.
- *
- * Note: jsondiffpatch.patch() mutates the object in-place, so we deep-clone
- * the parsed local config before patching to avoid side effects.
+ * Writes the template config to `localConfigPath`, first backing up the
+ * existing file to `<localConfigPath>.bak`.
  */
-export function applyPatch(localConfigPath: string, rawDelta: Delta): void {
-	const local = JSON.parse(readFileSync(localConfigPath, 'utf8')) as Record<
-		string,
-		unknown
-	>;
-	// patch() mutates in-place; clone first so the original parsed value is untouched
-	const patched = structuredClone(local);
-	jsondiffpatch.patch(patched, rawDelta);
+export function applyPatch(
+	localConfigPath: string,
+	template: Record<string, unknown>,
+): void {
+	copyFileSync(localConfigPath, `${localConfigPath}.bak`);
 	writeFileSync(
 		localConfigPath,
-		JSON.stringify(patched, null, 2) + '\n',
+		JSON.stringify(template, null, 2) + '\n',
 		'utf8',
 	);
 }

@@ -337,9 +337,7 @@ agentCommand
 			<AgentConfigure
 				result={result}
 				onPatch={() => {
-					if (result.rawDelta) {
-						applyPatch(result.localConfigPath, result.rawDelta);
-					}
+					applyPatch(result.localConfigPath, result.template);
 				}}
 			/>,
 		);

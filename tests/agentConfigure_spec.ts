@@ -6,14 +6,15 @@ import {
 	writeFileSync,
 	readFileSync,
 	copyFileSync,
+	existsSync,
 } from 'node:fs';
 import {join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {tmpdir} from 'node:os';
+import * as jsondiffpatch from 'jsondiffpatch';
 
 const thisDir = dirname(fileURLToPath(import.meta.url));
-import * as jsondiffpatch from 'jsondiffpatch';
-import {type Delta} from 'jsondiffpatch';
+
 import {
 	parseDelta,
 	countChanges,
@@ -198,9 +199,8 @@ describe('countChanges', () => {
 // ---------------------------------------------------------------------------
 // applyPatch — uses a real temp file on disk
 //
-// jsondiffpatch.patch(obj, delta) transforms obj using the delta.
-// These tests use concrete deltas produced by jsondiffpatch.diff() or
-// manually cast to Delta to verify the file I/O and JSON formatting behavior.
+// applyPatch(localPath, template) backs up the local file to <path>.bak and
+// then writes the full template object as the new config.
 // ---------------------------------------------------------------------------
 
 describe('applyPatch', () => {
@@ -224,61 +224,44 @@ describe('applyPatch', () => {
 		return JSON.parse(readFileSync(p, 'utf8'));
 	}
 
-	test('adds a key via an "added" delta entry', () => {
-		// [value] delta = add the key to the object
-		const local = {b: 2};
+	test('writes the template as the new config', () => {
+		const local = {old: true};
+		const template = {new: true, extra: 42};
 		const localPath = writeLocal('local.json', local);
-		const delta = {a: [1]} as unknown as Delta;
-		applyPatch(localPath, delta);
-		expect(readLocal(localPath)).toEqual({b: 2, a: 1});
+		applyPatch(localPath, template);
+		expect(readLocal(localPath)).toEqual(template);
 	});
 
-	test('updates a value via a "changed" delta entry', () => {
-		// [from, to] delta = change value from → to
-		const local = {version: 1};
+	test('creates a .bak file containing the original local config', () => {
+		const local = {original: 'value'};
+		const template = {replacement: 'value'};
 		const localPath = writeLocal('local.json', local);
-		const delta = {version: [1, 99]} as unknown as Delta;
-		applyPatch(localPath, delta);
-		expect(readLocal(localPath)).toEqual({version: 99});
+		applyPatch(localPath, template);
+		expect(existsSync(`${localPath}.bak`)).toBe(true);
+		expect(readLocal(`${localPath}.bak`)).toEqual(local);
 	});
 
-	test('removes a key via a "removed" delta entry', () => {
-		// [val, 0, 0] delta = delete the key
-		const local = {keep: true, drop: 'bye'};
-		const localPath = writeLocal('local.json', local);
-		const delta = {drop: ['bye', 0, 0]} as unknown as Delta;
-		applyPatch(localPath, delta);
-		expect(readLocal(localPath)).toEqual({keep: true});
-	});
-
-	test('applies a nested delta correctly', () => {
-		const local = {settings: {debug: true, level: 3}};
-		const localPath = writeLocal('local.json', local);
-		const delta = {settings: {debug: [true, false]}} as unknown as Delta;
-		applyPatch(localPath, delta);
-		expect(readLocal(localPath)).toEqual({settings: {debug: false, level: 3}});
+	test('.bak preserves the exact original bytes', () => {
+		const original = '{"x":1}\n';
+		const localPath = join(tmpDir, 'local.json');
+		writeFileSync(localPath, original, 'utf8');
+		applyPatch(localPath, {x: 2});
+		expect(readFileSync(`${localPath}.bak`, 'utf8')).toBe(original);
 	});
 
 	test('writes formatted JSON with a trailing newline', () => {
-		const local = {x: 1};
-		const localPath = writeLocal('local.json', local);
-		const delta = {x: [1, 2]} as unknown as Delta;
-		applyPatch(localPath, delta);
+		const localPath = writeLocal('local.json', {x: 1});
+		applyPatch(localPath, {a: 1, b: 2});
 		const raw = readFileSync(localPath, 'utf8');
 		expect(raw.endsWith('\n')).toBe(true);
-		// Pretty-printed → has internal newlines too
 		expect(raw.split('\n').length).toBeGreaterThan(1);
 	});
 
-	test('round-trip: diff(local, template) then applyPatch produces template', () => {
-		// patch(obj, diff(obj, target)) = target
-		// So diff(local, template) followed by applyPatch(localFile, delta)
-		// results in local file becoming equal to template.
-		const template = {a: 1, b: 2};
-		const local = {b: 3, c: 4};
+	test('overwrites local with deeply nested template', () => {
+		const local = {top: {nested: 'old'}};
+		const template = {top: {nested: 'new', added: true}, extra: [1, 2]};
 		const localPath = writeLocal('local.json', local);
-		const delta = jsondiffpatch.create({}).diff(local, template);
-		applyPatch(localPath, delta!);
+		applyPatch(localPath, template);
 		expect(readLocal(localPath)).toEqual(template);
 	});
 });
@@ -444,7 +427,7 @@ describe('claude-template.json vs claude-target.json', () => {
 		expect(counts).toEqual({added: 0, changed: 0, removed: 2});
 	});
 
-	describe('applyPatch: bring target up to template', () => {
+	describe('applyPatch: write template over target', () => {
 		let tmpDir: string;
 		let workingCopy: string;
 
@@ -458,19 +441,13 @@ describe('claude-template.json vs claude-target.json', () => {
 			rmSync(tmpDir, {recursive: true, force: true});
 		});
 
-		test('patching target with diff(target, template) produces template', () => {
-			// patch(obj, diff(obj, desired)) = desired
-			const upgradeDelta = instance.diff(target, template);
-			applyPatch(workingCopy, upgradeDelta!);
-
-			const result = JSON.parse(readFileSync(workingCopy, 'utf8'));
-			expect(result).toEqual(template);
+		test('result equals the template', () => {
+			applyPatch(workingCopy, template);
+			expect(JSON.parse(readFileSync(workingCopy, 'utf8'))).toEqual(template);
 		});
 
-		test('patched file contains companyAnnouncements from template', () => {
-			const upgradeDelta = instance.diff(target, template);
-			applyPatch(workingCopy, upgradeDelta!);
-
+		test('result contains companyAnnouncements from template', () => {
+			applyPatch(workingCopy, template);
 			const result = JSON.parse(readFileSync(workingCopy, 'utf8')) as Record<
 				string,
 				unknown
@@ -480,10 +457,8 @@ describe('claude-template.json vs claude-target.json', () => {
 			);
 		});
 
-		test('patched file contains env block from template', () => {
-			const upgradeDelta = instance.diff(target, template);
-			applyPatch(workingCopy, upgradeDelta!);
-
+		test('result contains env block from template', () => {
+			applyPatch(workingCopy, template);
 			const result = JSON.parse(readFileSync(workingCopy, 'utf8')) as Record<
 				string,
 				unknown
@@ -491,25 +466,16 @@ describe('claude-template.json vs claude-target.json', () => {
 			expect(result['env']).toEqual(template['env']);
 		});
 
-		test('patched file preserves keys that were already correct in target', () => {
-			const upgradeDelta = instance.diff(target, template);
-			applyPatch(workingCopy, upgradeDelta!);
-
-			const result = JSON.parse(readFileSync(workingCopy, 'utf8')) as Record<
-				string,
-				unknown
-			>;
-			expect(result['model']).toBe(target['model']);
-			expect(result['effortLevel']).toBe(target['effortLevel']);
-			expect(result['enabledPlugins']).toEqual(target['enabledPlugins']);
-			expect(result['permissions']).toEqual(target['permissions']);
-			expect(result['attribution']).toEqual(target['attribution']);
+		test('creates a .bak of the original target', () => {
+			applyPatch(workingCopy, template);
+			expect(existsSync(`${workingCopy}.bak`)).toBe(true);
+			expect(JSON.parse(readFileSync(`${workingCopy}.bak`, 'utf8'))).toEqual(
+				target,
+			);
 		});
 
-		test('patched file is written as formatted JSON with a trailing newline', () => {
-			const upgradeDelta = instance.diff(target, template);
-			applyPatch(workingCopy, upgradeDelta!);
-
+		test('result is formatted JSON with a trailing newline', () => {
+			applyPatch(workingCopy, template);
 			const raw = readFileSync(workingCopy, 'utf8');
 			expect(raw.endsWith('\n')).toBe(true);
 			expect(raw.split('\n').length).toBeGreaterThan(1);
