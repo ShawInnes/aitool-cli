@@ -23,7 +23,12 @@ export class ContinueAgent implements Agent {
 	readonly displayName = 'Continue';
 	readonly url = 'https://continue.dev';
 	readonly githubUrl = 'https://github.com/continuedev/continue';
-	readonly installUrl = 'https://docs.continue.dev/install/vscode';
+	readonly installUrl = 'https://docs.continue.dev/cli/quickstart';
+	readonly installCommands = {
+		mac: 'npm install -g @continuedev/cli',
+		linux: 'npm install -g @continuedev/cli',
+		windows: 'npm install -g @continuedev/cli',
+	};
 
 	private readonly exec: Executor;
 

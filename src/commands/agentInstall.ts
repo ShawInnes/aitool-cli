@@ -15,6 +15,7 @@ export type AgentInstallResult = {
 	displayName: string;
 	url: string;
 	installUrl: string | undefined;
+	installCommands: {mac?: string; linux?: string; windows?: string} | undefined;
 };
 
 /**
@@ -38,6 +39,7 @@ export function runAgentInstall(
 		displayName: agent.displayName,
 		url: agent.url,
 		installUrl: agent.installUrl,
+		installCommands: agent.installCommands,
 	};
 
 	if (json) {
@@ -54,6 +56,14 @@ export function runAgentInstall(
 				`No install page is registered for ${agent.displayName}. ` +
 					`See the website instead: ${agent.url}`,
 			);
+		}
+
+		const cmds = agent.installCommands;
+		if (cmds) {
+			console.log('Install commands:');
+			if (cmds.mac) console.log(`  macOS   ${cmds.mac}`);
+			if (cmds.linux) console.log(`  Linux   ${cmds.linux}`);
+			if (cmds.windows) console.log(`  Windows ${cmds.windows}`);
 		}
 	}
 

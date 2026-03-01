@@ -37,6 +37,16 @@ export interface Agent {
 	readonly installUrl?: string;
 
 	/**
+	 * Platform-specific shell commands to install this agent.
+	 * Each entry is a shell command string the user can run directly.
+	 */
+	readonly installCommands?: {
+		readonly mac?: string;
+		readonly linux?: string;
+		readonly windows?: string;
+	};
+
+	/**
 	 * Optional: returns the default local config file path for this agent on the
 	 * current platform (e.g. `~/.claude/settings.json`). Used by
 	 * `agent configure` to locate the file to diff against the template.

@@ -7,9 +7,26 @@ type Props = {
 	readonly result: AgentInstallResult;
 };
 
+const LABEL_WIDTH = 8;
+
+function CmdRow({
+	label,
+	command,
+}: {
+	readonly label: string;
+	readonly command: string;
+}) {
+	return (
+		<Box gap={1}>
+			<Text color="gray">{label.padEnd(LABEL_WIDTH)}</Text>
+			<Text color="yellow">{command}</Text>
+		</Box>
+	);
+}
+
 export default function AgentInstall({result}: Props) {
 	const {exit} = useApp();
-	const {displayName, installUrl, url} = result;
+	const {displayName, installUrl, installCommands, url} = result;
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -27,29 +44,38 @@ export default function AgentInstall({result}: Props) {
 				<Text bold>{displayName}</Text>
 			</Box>
 
-			{installUrl ? (
-				<Box
-					flexDirection="column"
-					borderStyle="single"
-					borderColor="gray"
-					paddingX={1}
-				>
+			<Box
+				flexDirection="column"
+				borderStyle="single"
+				borderColor="gray"
+				paddingX={1}
+			>
+				{installUrl ? (
 					<Box gap={1}>
-						<Text color="gray">install</Text>
+						<Text color="gray">{'docs'.padEnd(LABEL_WIDTH)}</Text>
 						<Text color="cyan">{installUrl}</Text>
 					</Box>
+				) : (
 					<Box gap={1}>
-						<Text color="gray">website</Text>
-						<Text>{url}</Text>
+						<Text color="gray">{'website'.padEnd(LABEL_WIDTH)}</Text>
+						<Text color="cyan">{url}</Text>
 					</Box>
-				</Box>
-			) : (
-				<Box gap={1}>
-					<Text color="yellow">⚠</Text>
-					<Text>No install page registered. See the website:</Text>
-					<Text color="cyan">{url}</Text>
-				</Box>
-			)}
+				)}
+
+				{installCommands && (
+					<Box flexDirection="column" marginTop={1}>
+						{installCommands.mac && (
+							<CmdRow label="macOS" command={installCommands.mac} />
+						)}
+						{installCommands.linux && (
+							<CmdRow label="Linux" command={installCommands.linux} />
+						)}
+						{installCommands.windows && (
+							<CmdRow label="Windows" command={installCommands.windows} />
+						)}
+					</Box>
+				)}
+			</Box>
 		</Box>
 	);
 }
