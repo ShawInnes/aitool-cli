@@ -20,6 +20,7 @@ import {runAgentCheck} from './commands/agentCheck.js';
 import {runAgentConfigure, applyPatch} from './commands/agentConfigure.js';
 import {runAgentInstall} from './commands/agentInstall.js';
 import {runAgentList} from './commands/agentList.js';
+import AgentInstall from './components/AgentInstall.js';
 import AgentConfigure from './components/AgentConfigure.js';
 import SetupWizard from './components/SetupWizard.js';
 import AuthLogin from './components/AuthLogin.js';
@@ -301,8 +302,20 @@ agentCommand
 	.command('install <agent-id>')
 	.description('Show the installation page URL for an agent')
 	.option('--json', 'output result as JSON')
-	.action((agentId: string, options: {json?: boolean}) => {
-		runAgentInstall({agent: agentId, json: options.json});
+	.action(async (agentId: string, options: {json?: boolean}) => {
+		const globalOptions = (
+			agentCommand.parent as typeof program
+		).opts<GlobalOptions>();
+		const tui = !options.json && isTuiMode(globalOptions);
+		const result = runAgentInstall({
+			agent: agentId,
+			json: options.json,
+			silent: tui,
+		});
+		if (tui) {
+			const {waitUntilExit} = render(<AgentInstall result={result} />);
+			await waitUntilExit();
+		}
 	});
 
 agentCommand

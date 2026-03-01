@@ -6,11 +6,14 @@ export type AgentInstallOptions = {
 	agent: string;
 	/** Output raw JSON instead of human-readable text. */
 	json?: boolean;
+	/** When true, suppress plain-text console output (caller will render a TUI). */
+	silent?: boolean;
 };
 
 export type AgentInstallResult = {
 	id: string;
 	displayName: string;
+	url: string;
 	installUrl: string | undefined;
 };
 
@@ -21,7 +24,7 @@ export type AgentInstallResult = {
 export function runAgentInstall(
 	options: AgentInstallOptions,
 ): AgentInstallResult {
-	const {agent: agentId, json = false} = options;
+	const {agent: agentId, json = false, silent = false} = options;
 
 	const agent = AGENT_REGISTRY.find(a => a.id === agentId);
 	if (!agent) {
@@ -33,6 +36,7 @@ export function runAgentInstall(
 	const result: AgentInstallResult = {
 		id: agent.id,
 		displayName: agent.displayName,
+		url: agent.url,
 		installUrl: agent.installUrl,
 	};
 
@@ -41,14 +45,16 @@ export function runAgentInstall(
 		return result;
 	}
 
-	if (agent.installUrl) {
-		console.log(`${agent.displayName} install page:`);
-		console.log(`  ${agent.installUrl}`);
-	} else {
-		console.log(
-			`No install page is registered for ${agent.displayName}. ` +
-				`See the website instead: ${agent.url}`,
-		);
+	if (!silent) {
+		if (agent.installUrl) {
+			console.log(`${agent.displayName} install page:`);
+			console.log(`  ${agent.installUrl}`);
+		} else {
+			console.log(
+				`No install page is registered for ${agent.displayName}. ` +
+					`See the website instead: ${agent.url}`,
+			);
+		}
 	}
 
 	return result;
