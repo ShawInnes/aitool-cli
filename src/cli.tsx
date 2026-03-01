@@ -18,6 +18,7 @@ import {runAuthLogout} from './commands/authLogout.js';
 import {warnIfTokenExpiring} from './commands/tokenWarning.js';
 import {runAgentCheck} from './commands/agentCheck.js';
 import {runAgentConfigure, applyPatch} from './commands/agentConfigure.js';
+import {unifiedDiff} from './commands/unifiedDiff.js';
 import {runAgentInstall} from './commands/agentInstall.js';
 import {runAgentList} from './commands/agentList.js';
 import {AGENT_REGISTRY} from './agents/index.js';
@@ -413,11 +414,15 @@ agentCommand
 				if (!result.diff) {
 					console.log('No changes — local config matches template.');
 				} else {
-					const {added, changed, removed} = result.counts;
-					if (added) console.log(`  ${added} missing from local`);
-					if (changed) console.log(`  ${changed} changed`);
-					if (removed) console.log(`  ${removed} local-only`);
-					console.log('Dry run — no changes applied.');
+					const templateJson =
+						JSON.stringify(result.template, null, 2) + '\n';
+					const diff = unifiedDiff(
+						result.localContent,
+						templateJson,
+						`a/${result.localConfigPath}`,
+						`b/${result.localConfigPath}`,
+					);
+					console.log(diff);
 				}
 
 				return;

@@ -26,6 +26,8 @@ export type AgentConfigureResult = {
 	localConfigPath: string;
 	/** The full parsed template — written verbatim to disk by applyPatch(). */
 	template: Record<string, unknown>;
+	/** Raw content of the local config file as read from disk. */
+	localContent: string;
 	/** undefined when files are identical */
 	diff: Record<string, DiffNode> | undefined;
 	/** Counts for the summary line */
@@ -200,11 +202,10 @@ export async function runAgentConfigure(
 	}
 
 	let local: Record<string, unknown>;
+	let localContent: string;
 	try {
-		local = JSON.parse(readFileSync(localPath, 'utf8')) as Record<
-			string,
-			unknown
-		>;
+		localContent = readFileSync(localPath, 'utf8');
+		local = JSON.parse(localContent) as Record<string, unknown>;
 	} catch (err) {
 		console.error(
 			`Failed to parse local config at ${localPath}: ${(err as Error).message}`,
@@ -224,6 +225,7 @@ export async function runAgentConfigure(
 			templatePath: agent.templatePath!,
 			localConfigPath: localPath,
 			template,
+			localContent: localContent!,
 			diff: undefined,
 			counts: {added: 0, changed: 0, removed: 0},
 			rawDelta: undefined,
@@ -252,6 +254,7 @@ export async function runAgentConfigure(
 		templatePath: agent.templatePath!,
 		localConfigPath: localPath,
 		template,
+		localContent: localContent!,
 		diff,
 		counts,
 		rawDelta,
