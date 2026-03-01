@@ -17,23 +17,23 @@ export type AgentCheckResult = {
 };
 
 /**
- * Interface for an AI coding agent installation checker.
+ * Represents a registered AI coding agent.
  *
- * Each implementing class knows how to detect a specific agent binary
- * and extract its version string. The `check()` method must never throw —
- * it should return `installed: false` with an optional error message
- * when detection fails for any reason.
+ * An Agent carries its identity (id, displayName) and may implement optional
+ * capabilities directly. The `check()` method, if present, detects whether this
+ * agent is installed on the current system and must never throw — it should
+ * return `installed: false` with an optional error message when detection fails.
  */
-export interface AgentChecker {
+export interface Agent {
 	/** Machine-readable identifier used as the CLI argument (e.g. "claude-code") */
 	readonly id: string;
 	/** Human-readable display name (e.g. "Claude Code") */
 	readonly displayName: string;
 
 	/**
-	 * Checks whether this agent is installed on the current system.
+	 * Optional: checks whether this agent is installed on the current system.
 	 *
 	 * Returns a resolved promise — never rejects.
 	 */
-	check(): Promise<AgentCheckResult>;
+	check?(): Promise<AgentCheckResult>;
 }

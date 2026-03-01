@@ -17,6 +17,7 @@ import {runAuthUserinfo} from './commands/authUserinfo.js';
 import {runAuthLogout} from './commands/authLogout.js';
 import {warnIfTokenExpiring} from './commands/tokenWarning.js';
 import {runAgentCheck} from './commands/agentCheck.js';
+import {runAgentList} from './commands/agentList.js';
 import SetupWizard from './components/SetupWizard.js';
 import AuthLogin from './components/AuthLogin.js';
 import AuthStatus from './components/AuthStatus.js';
@@ -272,6 +273,14 @@ program
 const agentCommand = program
 	.command('agent')
 	.description('Manage and inspect AI coding agents');
+
+agentCommand
+	.command('list')
+	.description('List all available agent types and their capabilities')
+	.option('--json', 'output results as JSON')
+	.action((options: {json?: boolean}) => {
+		runAgentList({json: options.json});
+	});
 
 agentCommand
 	.command('check [agent-id]')

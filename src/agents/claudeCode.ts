@@ -1,13 +1,9 @@
 // src/agents/claudeCode.ts
 import {execSync as nodeExecSync} from 'node:child_process';
-import {
-	type AgentCheckResult,
-	type AgentChecker,
-	type Executor,
-} from './agent.js';
+import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
 
 /**
- * Checks whether Claude Code (Anthropic's AI coding CLI) is installed.
+ * Claude Code (Anthropic's AI coding CLI) agent.
  *
  * Detection strategy:
  *  1. Run `claude --version` and capture stdout.
@@ -23,7 +19,7 @@ import {
  *  - Binary name: `claude`
  *  - Typical paths: ~/.local/bin/claude, ~/.claude/bin/claude
  */
-export class ClaudeCodeChecker implements AgentChecker {
+export class ClaudeCodeAgent implements Agent {
 	readonly id = 'claude-code';
 	readonly displayName = 'Claude Code';
 
@@ -60,3 +56,5 @@ export class ClaudeCodeChecker implements AgentChecker {
 		}
 	}
 }
+
+export const claudeCode: Agent = new ClaudeCodeAgent();

@@ -1,4 +1,21 @@
+---
+name: add-cli-command
+description: Add a New CLI Command
+---
+
 # Add a New CLI Command
+
+## CLI Command Structure (Commander.js)
+
+- Use **Commander.js** for all CLI argument parsing. No other argument parsers.
+- **Command definitions** live in `src/cli.tsx`: `.command()`, `.description()`, `.option()`, `.action()`.
+- **Execution logic** lives in `src/commands/<name>.ts` as exported async functions.
+- Action handlers in `src/cli.tsx` must only: extract options, determine TUI vs CLI mode, then delegate to execution
+  functions. No business logic in action handlers.
+- Execution functions in `src/commands/` must **not** import Commander — they must be callable by both CLI action
+  handlers and TUI components without modification.
+- Global options (e.g. `--config-dir`, `--no-tui`) are defined on the root `program` only. Per-command options are
+  defined on their respective subcommands only.
 
 1. Create `src/commands/<name>.ts`:
    - Export `async function run<Name>(options, configDir?: string): Promise<void>`

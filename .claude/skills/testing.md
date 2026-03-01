@@ -1,3 +1,8 @@
+---
+name: testing
+description: A skill to add and run tests in this project
+---
+
 # Testing
 
 - Runner: `bun test`
@@ -18,21 +23,23 @@ bun test                  # all test files
 
 ```ts
 describe('MyChecker', () => {
-  test('installed with version', async () => {
-    const exec: Executor = (cmd) => {
-      if (cmd === 'myagent --version') return 'myagent 1.0.0\n';
-      throw new Error('not found');
-    };
-    const result = await new MyChecker(exec).check();
-    expect(result.installed).toBe(true);
-    expect(result.version).toBe('myagent 1.0.0');
-  });
+	test('installed with version', async () => {
+		const exec: Executor = (cmd) => {
+			if (cmd === 'myagent --version') return 'myagent 1.0.0\n';
+			throw new Error('not found');
+		};
+		const result = await new MyChecker(exec).check();
+		expect(result.installed).toBe(true);
+		expect(result.version).toBe('myagent 1.0.0');
+	});
 
-  test('not installed', async () => {
-    const exec: Executor = () => { throw new Error('not found'); };
-    const result = await new MyChecker(exec).check();
-    expect(result.installed).toBe(false);
-    expect(result.error).toBeTruthy();
-  });
+	test('not installed', async () => {
+		const exec: Executor = () => {
+			throw new Error('not found');
+		};
+		const result = await new MyChecker(exec).check();
+		expect(result.installed).toBe(false);
+		expect(result.error).toBeTruthy();
+	});
 });
 ```

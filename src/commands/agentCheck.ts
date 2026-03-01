@@ -1,4 +1,4 @@
-import {AGENT_REGISTRY, type AgentChecker} from '../agents/index.js';
+import {AGENT_REGISTRY, type Agent} from '../agents/index.js';
 
 export type AgentCheckOptions = {
 	/** If provided, only check the agent with this id. Check all if omitted. */
@@ -19,6 +19,8 @@ export type AgentCheckSummary = {
 /**
  * Runs install checks for one or all registered agents and prints the results.
  *
+ * Only agents that implement a `check()` method are checked.
+ *
  * @param options.agent - optional agent id to check (e.g. "claude-code").
  *                        When omitted, all agents in AGENT_REGISTRY are checked.
  * @param options.json  - when true, print a JSON array instead of plain text.
@@ -28,26 +30,27 @@ export async function runAgentCheck(
 ): Promise<void> {
 	const {agent: agentId, json = false} = options;
 
-	// Resolve which checkers to run
-	let checkers: AgentChecker[];
+	let agents: Agent[];
 	if (agentId) {
-		const found = AGENT_REGISTRY.find(c => c.id === agentId);
+		const found = AGENT_REGISTRY.find(a => a.id === agentId);
 		if (!found) {
-			const valid = AGENT_REGISTRY.map(c => c.id).join(', ');
+			const valid = AGENT_REGISTRY.map(a => a.id).join(', ');
 			console.error(`Unknown agent "${agentId}". Valid options: ${valid}`);
 			process.exit(1);
 		}
 
-		checkers = [found];
+		agents = [found];
 	} else {
-		checkers = AGENT_REGISTRY;
+		agents = AGENT_REGISTRY;
 	}
+
+	const checkable = agents.filter(a => a.check !== undefined);
 
 	// Run all checks in parallel
 	const results: AgentCheckSummary[] = await Promise.all(
-		checkers.map(async c => {
-			const result = await c.check();
-			return {id: c.id, displayName: c.displayName, ...result};
+		checkable.map(async a => {
+			const result = await a.check!();
+			return {id: a.id, displayName: a.displayName, ...result};
 		}),
 	);
 

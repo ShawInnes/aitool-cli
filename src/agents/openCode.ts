@@ -1,13 +1,9 @@
 // src/agents/openCode.ts
 import {execSync as nodeExecSync} from 'node:child_process';
-import {
-	type AgentCheckResult,
-	type AgentChecker,
-	type Executor,
-} from './agent.js';
+import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
 
 /**
- * Checks whether Open Code (opencode-ai terminal coding agent) is installed.
+ * Open Code (opencode-ai terminal coding agent) agent.
  *
  * Detection strategy:
  *  1. Run `opencode --version` and capture stdout.
@@ -23,7 +19,7 @@ import {
  *  - Binary name: `opencode`
  *  - Repository: https://github.com/opencode-ai/opencode
  */
-export class OpenCodeChecker implements AgentChecker {
+export class OpenCodeAgent implements Agent {
 	readonly id = 'opencode';
 	readonly displayName = 'Open Code';
 
@@ -63,3 +59,5 @@ export class OpenCodeChecker implements AgentChecker {
 		}
 	}
 }
+
+export const openCode: Agent = new OpenCodeAgent();

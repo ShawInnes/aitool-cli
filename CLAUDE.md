@@ -1,5 +1,15 @@
 # Development Rules
 
+## External File Loading
+
+CRITICAL: When you encounter a file reference (e.g., @rules/general.md), use your Read tool to load it on a need-to-know basis. They're relevant to the SPECIFIC task at hand.
+
+Instructions:
+
+- Do NOT preemptively load all references - use lazy loading based on actual need
+- When loaded, treat content as mandatory instructions that override defaults
+- Follow references recursively when needed
+
 ## Language
 
 - Always use **TypeScript**. No plain JavaScript files.
@@ -16,18 +26,6 @@
 - Keep code separated into **logical files** — one concern per file.
 - Group related functionality into modules under `src/`.
 - Avoid large monolithic files; split by feature, layer, or responsibility.
-
-## CLI Command Structure (Commander.js)
-
-- Use **Commander.js** for all CLI argument parsing. No other argument parsers.
-- **Command definitions** live in `src/cli.tsx`: `.command()`, `.description()`, `.option()`, `.action()`.
-- **Execution logic** lives in `src/commands/<name>.ts` as exported async functions.
-- Action handlers in `src/cli.tsx` must only: extract options, determine TUI vs CLI mode, then delegate to execution
-  functions. No business logic in action handlers.
-- Execution functions in `src/commands/` must **not** import Commander — they must be callable by both CLI action
-  handlers and TUI components without modification.
-- Global options (e.g. `--config-dir`, `--no-tui`) are defined on the root `program` only. Per-command options are
-  defined on their respective subcommands only.
 
 ---
 
@@ -92,12 +90,3 @@ Files: `config.json` and `credentials.json`, both `0o600`. Override with `--conf
 - **`src/app.tsx`**: Unused scaffolding placeholder — ignore it.
 - **Token refresh buffer**: `runTokenRefresh` refreshes 30 min before expiry (`TOKEN_REFRESH_BUFFER_MS`).
 
----
-
-## Skills
-
-Step-by-step guides for common tasks live in `.claude/skills/`:
-
-- [`add-agent-checker.md`](.claude/skills/add-agent-checker.md) — add a new AI agent checker
-- [`add-cli-command.md`](.claude/skills/add-cli-command.md) — add a new CLI command + optional TUI component
-- [`testing.md`](.claude/skills/testing.md) — testing patterns and test runner usage
