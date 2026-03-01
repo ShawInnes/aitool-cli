@@ -56,10 +56,7 @@
 		},
 		"nodeArguments": [
 			"--loader=ts-node/esm"
-		],
-		"environmentVariables": {
-			"TS_NODE_IGNORE_DIAGNOSTICS": "2349,7006"
-		}
+		]
 	},
 	"xo": [
 		{

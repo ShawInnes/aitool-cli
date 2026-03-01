@@ -2,10 +2,7 @@
 	"extends": "@sindresorhus/tsconfig",
 	"compilerOptions": {
 		"outDir": "dist",
-		"resolveJsonModule": true,
-      "allowSyntheticDefaultImports": true,
-      "module": "nodenext",
-      "moduleResolution": "nodenext"
-    },
-	"include": ["src", "test-agents.ts"]
+		"resolveJsonModule": true
+	},
+	"include": ["src"]
 }

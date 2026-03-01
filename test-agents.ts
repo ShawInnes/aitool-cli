@@ -1,89 +1,97 @@
 // test-agents.ts
-import test, {type ExecutionContext} from 'ava';
+import {describe, expect, test} from 'bun:test';
 import {ClaudeCodeChecker} from './src/agents/claudeCode.js';
 import {OpenCodeChecker} from './src/agents/openCode.js';
 import {AGENT_REGISTRY} from './src/agents/index.js';
 
+type Executor = (cmd: string, opts: {stdio: string; encoding: string}) => string;
+
 // ─── ClaudeCodeChecker ──────────────────────────────────────────────────────
 
-test('ClaudeCodeChecker has correct id and displayName', (t: ExecutionContext) => {
-	const checker = new ClaudeCodeChecker();
-	t.is(checker.id, 'claude-code');
-	t.is(checker.displayName, 'Claude Code');
-});
-
-test('ClaudeCodeChecker.check() returns installed:true with version when claude --version succeeds', async (t: ExecutionContext) => {
-	const checker = new ClaudeCodeChecker((cmd: string, _opts: {stdio: string; encoding: string}) => {
-		if (cmd === 'claude --version') return 'claude 1.2.3\n';
-		throw new Error('not found');
+describe('ClaudeCodeChecker', () => {
+	test('has correct id and displayName', () => {
+		const checker = new ClaudeCodeChecker();
+		expect(checker.id).toBe('claude-code');
+		expect(checker.displayName).toBe('Claude Code');
 	});
-	const result = await checker.check();
-	t.true(result.installed);
-	t.is(result.version, 'claude 1.2.3');
-});
 
-test('ClaudeCodeChecker.check() falls back to which and returns path when --version fails', async (t: ExecutionContext) => {
-	const checker = new ClaudeCodeChecker((cmd: string, _opts: {stdio: string; encoding: string}) => {
-		if (cmd === 'which claude') return '/usr/local/bin/claude\n';
-		throw new Error('not found');
+	test('returns installed:true with version when claude --version succeeds', async () => {
+		const exec: Executor = (cmd) => {
+			if (cmd === 'claude --version') return 'claude 1.2.3\n';
+			throw new Error('not found');
+		};
+		const result = await new ClaudeCodeChecker(exec).check();
+		expect(result.installed).toBe(true);
+		expect(result.version).toBe('claude 1.2.3');
 	});
-	const result = await checker.check();
-	t.true(result.installed);
-	t.is(result.path, '/usr/local/bin/claude');
-	t.is(result.version, undefined);
-});
 
-test('ClaudeCodeChecker.check() returns installed:false when both commands fail', async (t: ExecutionContext) => {
-	const checker = new ClaudeCodeChecker((_cmd: string, _opts: {stdio: string; encoding: string}) => {
-		throw new Error('not found');
+	test('falls back to which and returns path when --version fails', async () => {
+		const exec: Executor = (cmd) => {
+			if (cmd === 'which claude') return '/usr/local/bin/claude\n';
+			throw new Error('not found');
+		};
+		const result = await new ClaudeCodeChecker(exec).check();
+		expect(result.installed).toBe(true);
+		expect(result.path).toBe('/usr/local/bin/claude');
+		expect(result.version).toBeUndefined();
 	});
-	const result = await checker.check();
-	t.false(result.installed);
-	t.truthy(result.error);
+
+	test('returns installed:false when both commands fail', async () => {
+		const exec: Executor = () => {
+			throw new Error('not found');
+		};
+		const result = await new ClaudeCodeChecker(exec).check();
+		expect(result.installed).toBe(false);
+		expect(result.error).toBeTruthy();
+	});
 });
 
 // ─── OpenCodeChecker ────────────────────────────────────────────────────────
 
-test('OpenCodeChecker has correct id and displayName', (t: ExecutionContext) => {
-	const checker = new OpenCodeChecker();
-	t.is(checker.id, 'opencode');
-	t.is(checker.displayName, 'Open Code');
-});
-
-test('OpenCodeChecker.check() returns installed:true with version when opencode --version succeeds', async (t: ExecutionContext) => {
-	const checker = new OpenCodeChecker((cmd: string, _opts: {stdio: string; encoding: string}) => {
-		if (cmd === 'opencode --version') return 'opencode 0.5.0\n';
-		throw new Error('not found');
+describe('OpenCodeChecker', () => {
+	test('has correct id and displayName', () => {
+		const checker = new OpenCodeChecker();
+		expect(checker.id).toBe('opencode');
+		expect(checker.displayName).toBe('Open Code');
 	});
-	const result = await checker.check();
-	t.true(result.installed);
-	t.is(result.version, 'opencode 0.5.0');
-});
 
-test('OpenCodeChecker.check() falls back to which and returns path when --version fails', async (t: ExecutionContext) => {
-	const checker = new OpenCodeChecker((cmd: string, _opts: {stdio: string; encoding: string}) => {
-		if (cmd === 'which opencode') return '/usr/local/bin/opencode\n';
-		throw new Error('not found');
+	test('returns installed:true with version when opencode --version succeeds', async () => {
+		const exec: Executor = (cmd) => {
+			if (cmd === 'opencode --version') return 'opencode 0.5.0\n';
+			throw new Error('not found');
+		};
+		const result = await new OpenCodeChecker(exec).check();
+		expect(result.installed).toBe(true);
+		expect(result.version).toBe('opencode 0.5.0');
 	});
-	const result = await checker.check();
-	t.true(result.installed);
-	t.is(result.path, '/usr/local/bin/opencode');
-	t.is(result.version, undefined);
-});
 
-test('OpenCodeChecker.check() returns installed:false when both commands fail', async (t: ExecutionContext) => {
-	const checker = new OpenCodeChecker((_cmd: string, _opts: {stdio: string; encoding: string}) => {
-		throw new Error('not found');
+	test('falls back to which and returns path when --version fails', async () => {
+		const exec: Executor = (cmd) => {
+			if (cmd === 'which opencode') return '/usr/local/bin/opencode\n';
+			throw new Error('not found');
+		};
+		const result = await new OpenCodeChecker(exec).check();
+		expect(result.installed).toBe(true);
+		expect(result.path).toBe('/usr/local/bin/opencode');
+		expect(result.version).toBeUndefined();
 	});
-	const result = await checker.check();
-	t.false(result.installed);
-	t.truthy(result.error);
+
+	test('returns installed:false when both commands fail', async () => {
+		const exec: Executor = () => {
+			throw new Error('not found');
+		};
+		const result = await new OpenCodeChecker(exec).check();
+		expect(result.installed).toBe(false);
+		expect(result.error).toBeTruthy();
+	});
 });
 
 // ─── Registry ───────────────────────────────────────────────────────────────
 
-test('AGENT_REGISTRY contains claude-code and opencode', (t: ExecutionContext) => {
-	const ids = AGENT_REGISTRY.map(a => a.id);
-	t.true(ids.includes('claude-code'));
-	t.true(ids.includes('opencode'));
+describe('AGENT_REGISTRY', () => {
+	test('contains claude-code and opencode', () => {
+		const ids = AGENT_REGISTRY.map(a => a.id);
+		expect(ids).toContain('claude-code');
+		expect(ids).toContain('opencode');
+	});
 });
