@@ -1,366 +1,366 @@
 {
-  "agents": [
-    {
-      "tag": "claude",
-      "name": "Claude Code",
-      "website": "https://claude.ai/code",
-      "github": null,
-      "description": "Anthropic's agentic AI coding tool for the terminal",
-      "opensource": false,
-      "supported": true,
-      "configFile": {
-        "mac": "~/.claude/settings.json",
-        "linux": "~/.claude/settings.json",
-        "windows": "~/.claude/settings.json"
-      }
-    },
-    {
-      "tag": "opencode",
-      "name": "OpenCode",
-      "website": "https://opencode.ai",
-      "github": "https://github.com/anomalyco/opencode",
-      "description": "Open source terminal AI coding agent built by the creators of terminal.shop",
-      "opensource": true,
-      "supported": true,
-      "configFile": {
-        "mac": "~/.config/opencode/opencode.json",
-        "linux": "~/.config/opencode/opencode.json",
-        "windows": "~/.config/opencode/opencode.json"
-      }
-    },
-    {
-      "tag": "crush",
-      "name": "Crush",
-      "website": "https://charm.land",
-      "github": "https://github.com/charmbracelet/crush",
-      "description": "Glamorous agentic terminal coding agent by Charmbracelet (successor to OpenCode)",
-      "opensource": true,
-      "supported": true,
-      "configFile": {
-        "mac": "~/.config/crush/crush.json",
-        "linux": "~/.config/crush/crush.json",
-        "windows": "%LOCALAPPDATA%\\crush\\crush.json"
-      }
-    },
-    {
-      "tag": "continue",
-      "name": "Continue",
-      "website": "https://continue.dev",
-      "github": "https://github.com/continuedev/continue",
-      "description": "Open source AI coding agent for VS Code and JetBrains with custom assistant support",
-      "opensource": true,
-      "supported": true,
-      "configFile": {
-        "mac": "~/.continue/config.yaml",
-        "linux": "~/.continue/config.yaml",
-        "windows": "%USERPROFILE%\\.continue\\config.yaml"
-      }
-    },
-    {
-      "tag": "openhands",
-      "name": "OpenHands",
-      "website": "https://all-hands.dev",
-      "github": "https://github.com/OpenHands/OpenHands",
-      "description": "Open source platform for AI software development agents (formerly OpenDevin)",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "codex",
-      "name": "Codex",
-      "website": "https://openai.com/codex",
-      "github": "https://github.com/openai/codex",
-      "description": "OpenAI's lightweight open-source coding agent for the terminal",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "gemini",
-      "name": "Gemini CLI",
-      "website": "https://geminicli.com",
-      "github": "https://github.com/google-gemini/gemini-cli",
-      "description": "Google's open-source AI agent that brings Gemini into your terminal",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "copilot",
-      "name": "GitHub Copilot",
-      "website": "https://github.com/features/copilot",
-      "github": null,
-      "description": "GitHub's AI pair programmer with agentic coding mode",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "aider",
-      "name": "Aider",
-      "website": "https://aider.chat",
-      "github": "https://github.com/Aider-AI/aider",
-      "description": "AI pair programming in your terminal supporting most LLMs",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "cursor",
-      "name": "Cursor",
-      "website": "https://cursor.com",
-      "github": null,
-      "description": "AI-first code editor built on VS Code",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "windsurf",
-      "name": "Windsurf",
-      "website": "https://windsurf.com",
-      "github": null,
-      "description": "Agentic AI IDE by Codeium with the Cascade multi-file reasoning system",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "qwen",
-      "name": "Qwen Code",
-      "website": "https://qwenlm.ai",
-      "github": "https://github.com/QwenLM/qwen-code",
-      "description": "Alibaba's open-source terminal coding agent powered by Qwen3-Coder",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "kimi",
-      "name": "Kimi Code",
-      "website": "https://kimi.com/code",
-      "github": null,
-      "description": "Moonshot AI's coding agent for the terminal and VS Code",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "plandex",
-      "name": "Plandex",
-      "website": "https://plandex.ai",
-      "github": "https://github.com/plandex-ai/plandex",
-      "description": "Open source terminal AI coding agent designed for large projects and complex tasks",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "zed",
-      "name": "Zed",
-      "website": "https://zed.dev",
-      "github": "https://github.com/zed-industries/zed",
-      "description": "Open source high-performance code editor with built-in AI agent",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "antigravity",
-      "name": "Google Antigravity",
-      "website": "https://antigravityai.org",
-      "github": null,
-      "description": "Google's agent-first AI IDE that orchestrates multiple AI agents in parallel",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "cline",
-      "name": "Cline",
-      "website": "https://cline.bot",
-      "github": "https://github.com/cline/cline",
-      "description": "Autonomous AI coding agent VS Code extension with Plan/Act modes",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "goose",
-      "name": "Goose",
-      "website": "https://block.github.io/goose",
-      "github": "https://github.com/block/goose",
-      "description": "Open source extensible AI developer agent by Block (Square)",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "roo",
-      "name": "Roo Code",
-      "website": "https://roocode.com",
-      "github": "https://github.com/RooCodeInc/Roo-Code",
-      "description": "AI dev team of agents built into VS Code, fork of Cline",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "kilo",
-      "name": "Kilo Code",
-      "website": "https://kilo.ai",
-      "github": "https://github.com/Kilo-Org/kilocode",
-      "description": "All-in-one open source agentic engineering platform for VS Code, JetBrains, and CLI",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "trae",
-      "name": "Trae",
-      "website": "https://trae.ai",
-      "github": "https://github.com/bytedance/trae-agent",
-      "description": "ByteDance's open source LLM-based agent for software engineering tasks",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "droid",
-      "name": "Droid",
-      "website": "https://factory.ai",
-      "github": null,
-      "description": "Agent-native software development platform by Factory AI",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "clawdbot",
-      "name": "OpenClaw",
-      "website": "https://clawd.bot",
-      "github": "https://github.com/clawdbot/clawdbot",
-      "description": "Open source autonomous AI personal assistant driven via messaging platforms",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "kiro",
-      "name": "Kiro",
-      "website": "https://kiro.dev",
-      "github": "https://github.com/kirodotdev/Kiro",
-      "description": "AWS agentic IDE and CLI for spec-driven development from prototype to production",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "pi",
-      "name": "Pi",
-      "website": "https://pi.ai",
-      "github": null,
-      "description": "Personal AI assistant by Inflection AI focused on supportive conversation",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "neovate",
-      "name": "Neovate Code",
-      "website": "https://neovateai.dev",
-      "github": "https://github.com/neovateai/neovate-code",
-      "description": "Open source AI code agent by Ant Group supporting 20+ providers",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "zencoder",
-      "name": "Zencoder",
-      "website": "https://zencoder.ai",
-      "github": null,
-      "description": "AI coding agent platform with CI/CD integration and workflow orchestration",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "amp",
-      "name": "Amp",
-      "website": "https://ampcode.com",
-      "github": null,
-      "description": "AI coding agent for teams by Sourcegraph with CLI and VS Code extension",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "qoder",
-      "name": "Qoder",
-      "website": "https://qoder.com",
-      "github": null,
-      "description": "Alibaba Cloud's agentic coding platform with autonomous Quest Mode",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "command-code",
-      "name": "Command Code",
-      "website": "https://commandcode.ai",
-      "github": "https://github.com/CommandCodeAI/command-code",
-      "description": "AI coding agent that learns your coding style via neuro-symbolic AI",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "amazon-q",
-      "name": "Amazon Q Developer",
-      "website": "https://aws.amazon.com/q/developer",
-      "github": "https://github.com/aws/amazon-q-developer-cli",
-      "description": "AWS AI coding assistant with agentic terminal chat and IDE integration",
-      "opensource": true,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "devin",
-      "name": "Devin",
-      "website": "https://devin.ai",
-      "github": null,
-      "description": "Cognition's autonomous AI software engineer that handles full development workflows",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "augment",
-      "name": "Augment Code",
-      "website": "https://augmentcode.com",
-      "github": null,
-      "description": "AI coding agent with deep codebase understanding, ranked #1 on SWE-bench Verified",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    },
-    {
-      "tag": "replit",
-      "name": "Replit Agent",
-      "website": "https://replit.com/products/agent",
-      "github": null,
-      "description": "Autonomous web app builder that builds, tests, and fixes apps from natural language",
-      "opensource": false,
-      "supported": false,
-      "configFile": null
-    }
-  ],
-  "notes": [
-    "crush is the successor to OpenCode, built by Charmbracelet after the original creator joined them",
-    "clawdbot evolved into OpenClaw after going through several name changes",
-    "qwen and qoder are both Alibaba products but serve different purposes (CLI agent vs. full IDE platform)",
-    "droid is Factory AI's product — it topped the Terminal-Bench benchmark"
-  ]
+	"agents": [
+		{
+			"tag": "claude",
+			"name": "Claude Code",
+			"website": "https://claude.ai/code",
+			"github": null,
+			"description": "Anthropic's agentic AI coding tool for the terminal",
+			"opensource": false,
+			"supported": true,
+			"configFile": {
+				"mac": "~/.claude/settings.json",
+				"linux": "~/.claude/settings.json",
+				"windows": "~/.claude/settings.json"
+			}
+		},
+		{
+			"tag": "opencode",
+			"name": "OpenCode",
+			"website": "https://opencode.ai",
+			"github": "https://github.com/anomalyco/opencode",
+			"description": "Open source terminal AI coding agent built by the creators of terminal.shop",
+			"opensource": true,
+			"supported": true,
+			"configFile": {
+				"mac": "~/.config/opencode/opencode.json",
+				"linux": "~/.config/opencode/opencode.json",
+				"windows": "~/.config/opencode/opencode.json"
+			}
+		},
+		{
+			"tag": "crush",
+			"name": "Crush",
+			"website": "https://charm.land",
+			"github": "https://github.com/charmbracelet/crush",
+			"description": "Glamorous agentic terminal coding agent by Charmbracelet (successor to OpenCode)",
+			"opensource": true,
+			"supported": true,
+			"configFile": {
+				"mac": "~/.config/crush/crush.json",
+				"linux": "~/.config/crush/crush.json",
+				"windows": "%LOCALAPPDATA%\\crush\\crush.json"
+			}
+		},
+		{
+			"tag": "continue",
+			"name": "Continue",
+			"website": "https://continue.dev",
+			"github": "https://github.com/continuedev/continue",
+			"description": "Open source AI coding agent for VS Code and JetBrains with custom assistant support",
+			"opensource": true,
+			"supported": true,
+			"configFile": {
+				"mac": "~/.continue/config.yaml",
+				"linux": "~/.continue/config.yaml",
+				"windows": "%USERPROFILE%\\.continue\\config.yaml"
+			}
+		},
+		{
+			"tag": "openhands",
+			"name": "OpenHands",
+			"website": "https://all-hands.dev",
+			"github": "https://github.com/OpenHands/OpenHands",
+			"description": "Open source platform for AI software development agents (formerly OpenDevin)",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "codex",
+			"name": "Codex",
+			"website": "https://openai.com/codex",
+			"github": "https://github.com/openai/codex",
+			"description": "OpenAI's lightweight open-source coding agent for the terminal",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "gemini",
+			"name": "Gemini CLI",
+			"website": "https://geminicli.com",
+			"github": "https://github.com/google-gemini/gemini-cli",
+			"description": "Google's open-source AI agent that brings Gemini into your terminal",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "copilot",
+			"name": "GitHub Copilot",
+			"website": "https://github.com/features/copilot",
+			"github": null,
+			"description": "GitHub's AI pair programmer with agentic coding mode",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "aider",
+			"name": "Aider",
+			"website": "https://aider.chat",
+			"github": "https://github.com/Aider-AI/aider",
+			"description": "AI pair programming in your terminal supporting most LLMs",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "cursor",
+			"name": "Cursor",
+			"website": "https://cursor.com",
+			"github": null,
+			"description": "AI-first code editor built on VS Code",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "windsurf",
+			"name": "Windsurf",
+			"website": "https://windsurf.com",
+			"github": null,
+			"description": "Agentic AI IDE by Codeium with the Cascade multi-file reasoning system",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "qwen",
+			"name": "Qwen Code",
+			"website": "https://qwenlm.ai",
+			"github": "https://github.com/QwenLM/qwen-code",
+			"description": "Alibaba's open-source terminal coding agent powered by Qwen3-Coder",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "kimi",
+			"name": "Kimi Code",
+			"website": "https://kimi.com/code",
+			"github": null,
+			"description": "Moonshot AI's coding agent for the terminal and VS Code",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "plandex",
+			"name": "Plandex",
+			"website": "https://plandex.ai",
+			"github": "https://github.com/plandex-ai/plandex",
+			"description": "Open source terminal AI coding agent designed for large projects and complex tasks",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "zed",
+			"name": "Zed",
+			"website": "https://zed.dev",
+			"github": "https://github.com/zed-industries/zed",
+			"description": "Open source high-performance code editor with built-in AI agent",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "antigravity",
+			"name": "Google Antigravity",
+			"website": "https://antigravityai.org",
+			"github": null,
+			"description": "Google's agent-first AI IDE that orchestrates multiple AI agents in parallel",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "cline",
+			"name": "Cline",
+			"website": "https://cline.bot",
+			"github": "https://github.com/cline/cline",
+			"description": "Autonomous AI coding agent VS Code extension with Plan/Act modes",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "goose",
+			"name": "Goose",
+			"website": "https://block.github.io/goose",
+			"github": "https://github.com/block/goose",
+			"description": "Open source extensible AI developer agent by Block (Square)",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "roo",
+			"name": "Roo Code",
+			"website": "https://roocode.com",
+			"github": "https://github.com/RooCodeInc/Roo-Code",
+			"description": "AI dev team of agents built into VS Code, fork of Cline",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "kilo",
+			"name": "Kilo Code",
+			"website": "https://kilo.ai",
+			"github": "https://github.com/Kilo-Org/kilocode",
+			"description": "All-in-one open source agentic engineering platform for VS Code, JetBrains, and CLI",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "trae",
+			"name": "Trae",
+			"website": "https://trae.ai",
+			"github": "https://github.com/bytedance/trae-agent",
+			"description": "ByteDance's open source LLM-based agent for software engineering tasks",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "droid",
+			"name": "Droid",
+			"website": "https://factory.ai",
+			"github": null,
+			"description": "Agent-native software development platform by Factory AI",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "clawdbot",
+			"name": "OpenClaw",
+			"website": "https://clawd.bot",
+			"github": "https://github.com/clawdbot/clawdbot",
+			"description": "Open source autonomous AI personal assistant driven via messaging platforms",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "kiro",
+			"name": "Kiro",
+			"website": "https://kiro.dev",
+			"github": "https://github.com/kirodotdev/Kiro",
+			"description": "AWS agentic IDE and CLI for spec-driven development from prototype to production",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "pi",
+			"name": "Pi",
+			"website": "https://pi.ai",
+			"github": null,
+			"description": "Personal AI assistant by Inflection AI focused on supportive conversation",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "neovate",
+			"name": "Neovate Code",
+			"website": "https://neovateai.dev",
+			"github": "https://github.com/neovateai/neovate-code",
+			"description": "Open source AI code agent by Ant Group supporting 20+ providers",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "zencoder",
+			"name": "Zencoder",
+			"website": "https://zencoder.ai",
+			"github": null,
+			"description": "AI coding agent platform with CI/CD integration and workflow orchestration",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "amp",
+			"name": "Amp",
+			"website": "https://ampcode.com",
+			"github": null,
+			"description": "AI coding agent for teams by Sourcegraph with CLI and VS Code extension",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "qoder",
+			"name": "Qoder",
+			"website": "https://qoder.com",
+			"github": null,
+			"description": "Alibaba Cloud's agentic coding platform with autonomous Quest Mode",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "command-code",
+			"name": "Command Code",
+			"website": "https://commandcode.ai",
+			"github": "https://github.com/CommandCodeAI/command-code",
+			"description": "AI coding agent that learns your coding style via neuro-symbolic AI",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "amazon-q",
+			"name": "Amazon Q Developer",
+			"website": "https://aws.amazon.com/q/developer",
+			"github": "https://github.com/aws/amazon-q-developer-cli",
+			"description": "AWS AI coding assistant with agentic terminal chat and IDE integration",
+			"opensource": true,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "devin",
+			"name": "Devin",
+			"website": "https://devin.ai",
+			"github": null,
+			"description": "Cognition's autonomous AI software engineer that handles full development workflows",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "augment",
+			"name": "Augment Code",
+			"website": "https://augmentcode.com",
+			"github": null,
+			"description": "AI coding agent with deep codebase understanding, ranked #1 on SWE-bench Verified",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		},
+		{
+			"tag": "replit",
+			"name": "Replit Agent",
+			"website": "https://replit.com/products/agent",
+			"github": null,
+			"description": "Autonomous web app builder that builds, tests, and fixes apps from natural language",
+			"opensource": false,
+			"supported": false,
+			"configFile": null
+		}
+	],
+	"notes": [
+		"crush is the successor to OpenCode, built by Charmbracelet after the original creator joined them",
+		"clawdbot evolved into OpenClaw after going through several name changes",
+		"qwen and qoder are both Alibaba products but serve different purposes (CLI agent vs. full IDE platform)",
+		"droid is Factory AI's product — it topped the Terminal-Bench benchmark"
+	]
 }
