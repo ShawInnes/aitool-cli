@@ -1,11 +1,10 @@
 // src/agents/openCode.ts
 import {execSync as nodeExecSync} from 'node:child_process';
-import {type AgentCheckResult, type AgentChecker} from './agent.js';
-
-type Executor = (
-	cmd: string,
-	opts: {stdio: string; encoding: string},
-) => string;
+import {
+	type AgentCheckResult,
+	type AgentChecker,
+	type Executor,
+} from './agent.js';
 
 /**
  * Checks whether Open Code (opencode-ai terminal coding agent) is installed.
@@ -51,10 +50,10 @@ export class OpenCodeChecker implements AgentChecker {
 		const whichCmd =
 			process.platform === 'win32' ? 'where opencode' : 'which opencode';
 		try {
-			const path = this.exec(whichCmd, {
-				stdio: 'pipe',
-				encoding: 'utf8',
-			}).trim();
+			const path =
+				this.exec(whichCmd, {stdio: 'pipe', encoding: 'utf8'})
+					.split('\n')[0]
+					?.trim() ?? '';
 			return {installed: true, path};
 		} catch {
 			return {

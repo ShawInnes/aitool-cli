@@ -3,8 +3,7 @@ import {describe, expect, test} from 'bun:test';
 import {ClaudeCodeChecker} from './src/agents/claudeCode.js';
 import {OpenCodeChecker} from './src/agents/openCode.js';
 import {AGENT_REGISTRY} from './src/agents/index.js';
-
-type Executor = (cmd: string, opts: {stdio: string; encoding: string}) => string;
+import {type Executor} from './src/agents/agent.js';
 
 // ─── ClaudeCodeChecker ──────────────────────────────────────────────────────
 

@@ -1,5 +1,11 @@
 // src/agents/agent.ts
 
+/** Executor function type for running shell commands — matches `execSync` signature. */
+export type Executor = (
+	cmd: string,
+	opts: {stdio: string; encoding: string},
+) => string;
+
 /**
  * Result of checking whether an AI coding agent is installed.
  */
