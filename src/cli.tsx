@@ -16,6 +16,7 @@ import {formatRelativeTime, runAuthStatus} from './commands/authStatus.js';
 import {runAuthUserinfo} from './commands/authUserinfo.js';
 import {runAuthLogout} from './commands/authLogout.js';
 import {warnIfTokenExpiring} from './commands/tokenWarning.js';
+import {runAgentCheck} from './commands/agentCheck.js';
 import SetupWizard from './components/SetupWizard.js';
 import AuthLogin from './components/AuthLogin.js';
 import AuthStatus from './components/AuthStatus.js';
@@ -266,6 +267,22 @@ program
 	.description('Update to the latest version')
 	.action(async () => {
 		await selfUpdate();
+	});
+
+const agentCommand = program
+	.command('agent')
+	.description('Manage and inspect AI coding agents');
+
+agentCommand
+	.command('check [agent-id]')
+	.description(
+		'Check whether AI coding agents are installed. ' +
+			'Pass an agent id (claude-code, opencode) to check a specific one, ' +
+			'or omit to check all.',
+	)
+	.option('--json', 'output results as JSON')
+	.action(async (agentId: string | undefined, options: {json?: boolean}) => {
+		await runAgentCheck({agent: agentId, json: options.json});
 	});
 
 program.hook('preAction', (_thisCommand, actionCommand) => {
