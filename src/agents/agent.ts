@@ -29,6 +29,10 @@ export interface Agent {
 	readonly id: string;
 	/** Human-readable display name (e.g. "Claude Code") */
 	readonly displayName: string;
+	/** Agent's official website URL */
+	readonly url: string;
+	/** Agent's GitHub repository URL, if open source */
+	readonly githubUrl?: string;
 
 	/**
 	 * Optional: checks whether this agent is installed on the current system.

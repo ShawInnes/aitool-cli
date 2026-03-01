@@ -6,14 +6,14 @@ description: A skill to add and run tests in this project
 # Testing
 
 - Runner: `bun test`
-- Test files live in the tests/ root (e.g. `tests/agents_spec.ts`)
+- Test files live under `tests/` — agent tests are grouped in `tests/agents/` (e.g. `tests/agents/claudeCode_spec.ts`), cross-cutting tests at the root (e.g. `tests/registry_spec.ts`)
 - Import from `bun:test`: `describe`, `test`, `expect`
 
 ## Running tests
 
 ```sh
-bun test tests/agents_spec.ts   # specific file
-bun test                  # all test files
+bun test tests/agents/claudeCode_spec.ts   # specific file
+bun test tests/                            # all test files
 ```
 
 ## Patterns
@@ -24,7 +24,7 @@ bun test                  # all test files
 ```ts
 describe('MyChecker', () => {
 	test('installed with version', async () => {
-		const exec: Executor = (cmd) => {
+		const exec: Executor = cmd => {
 			if (cmd === 'myagent --version') return 'myagent 1.0.0\n';
 			throw new Error('not found');
 		};

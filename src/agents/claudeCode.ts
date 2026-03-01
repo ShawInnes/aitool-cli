@@ -22,6 +22,7 @@ import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
 export class ClaudeCodeAgent implements Agent {
 	readonly id = 'claude-code';
 	readonly displayName = 'Claude Code';
+	readonly url = 'https://claude.ai/code';
 
 	private readonly exec: Executor;
 

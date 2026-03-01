@@ -7,17 +7,19 @@ export type AgentListOptions = {
 export type AgentListEntry = {
 	id: string;
 	displayName: string;
-	capabilities: string[];
+	url: string;
+	githubUrl?: string;
 };
 
 export function runAgentList(options: AgentListOptions = {}): void {
 	const {json = false} = options;
 
-	const entries: AgentListEntry[] = AGENT_REGISTRY.map(agent => {
-		const capabilities: string[] = [];
-		if (agent.check) capabilities.push('install-check');
-		return {id: agent.id, displayName: agent.displayName, capabilities};
-	});
+	const entries: AgentListEntry[] = AGENT_REGISTRY.map(agent => ({
+		id: agent.id,
+		displayName: agent.displayName,
+		url: agent.url,
+		...(agent.githubUrl ? {githubUrl: agent.githubUrl} : {}),
+	}));
 
 	if (json) {
 		console.log(JSON.stringify(entries, null, 2));
@@ -25,11 +27,8 @@ export function runAgentList(options: AgentListOptions = {}): void {
 	}
 
 	for (const entry of entries) {
-		console.log(`${entry.id.padEnd(16)} ${entry.displayName}`);
-		if (entry.capabilities.length > 0) {
-			console.log(
-				`${''.padEnd(16)} capabilities: ${entry.capabilities.join(', ')}`,
-			);
-		}
+		console.log(
+			`${entry.id.padEnd(16)} ${entry.displayName.padEnd(16)} ${entry.url}`,
+		);
 	}
 }
