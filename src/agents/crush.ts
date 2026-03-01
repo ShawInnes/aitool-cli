@@ -25,6 +25,7 @@ export class CrushAgent implements Agent {
 	readonly displayName = 'Crush';
 	readonly url = 'https://charm.land';
 	readonly githubUrl = 'https://github.com/charmbracelet/crush';
+	readonly installUrl = 'https://github.com/charmbracelet/crush#installation';
 	readonly templatePath = 'crush.json';
 
 	defaultConfigFilePath(): string {

@@ -25,6 +25,7 @@ export class ClaudeCodeAgent implements Agent {
 	readonly id = 'claude-code';
 	readonly displayName = 'Claude Code';
 	readonly url = 'https://claude.ai/code';
+	readonly installUrl = 'https://docs.anthropic.com/en/docs/claude-code/setup';
 	readonly templatePath = 'claudeCode.json';
 
 	defaultConfigFilePath(): string {

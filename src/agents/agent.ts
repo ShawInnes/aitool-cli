@@ -33,6 +33,8 @@ export interface Agent {
 	readonly url: string;
 	/** Agent's GitHub repository URL, if open source */
 	readonly githubUrl?: string;
+	/** URL for the agent's installation instructions / download page */
+	readonly installUrl?: string;
 
 	/**
 	 * Optional: returns the default local config file path for this agent on the

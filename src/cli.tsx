@@ -18,6 +18,7 @@ import {runAuthLogout} from './commands/authLogout.js';
 import {warnIfTokenExpiring} from './commands/tokenWarning.js';
 import {runAgentCheck} from './commands/agentCheck.js';
 import {runAgentConfigure, applyPatch} from './commands/agentConfigure.js';
+import {runAgentInstall} from './commands/agentInstall.js';
 import {runAgentList} from './commands/agentList.js';
 import AgentConfigure from './components/AgentConfigure.js';
 import SetupWizard from './components/SetupWizard.js';
@@ -294,6 +295,14 @@ agentCommand
 	.option('--json', 'output results as JSON')
 	.action(async (agentId: string | undefined, options: {json?: boolean}) => {
 		await runAgentCheck({agent: agentId, json: options.json});
+	});
+
+agentCommand
+	.command('install <agent-id>')
+	.description('Show the installation page URL for an agent')
+	.option('--json', 'output result as JSON')
+	.action((agentId: string, options: {json?: boolean}) => {
+		runAgentInstall({agent: agentId, json: options.json});
 	});
 
 agentCommand
