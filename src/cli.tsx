@@ -19,6 +19,7 @@ import {warnIfTokenExpiring} from './commands/tokenWarning.js';
 import {runAgentCheck} from './commands/agentCheck.js';
 import {runAgentConfigure} from './commands/agentConfigure.js';
 import {runAgentList} from './commands/agentList.js';
+import AgentConfigure from './components/AgentConfigure.js';
 import SetupWizard from './components/SetupWizard.js';
 import AuthLogin from './components/AuthLogin.js';
 import AuthStatus from './components/AuthStatus.js';
@@ -306,7 +307,15 @@ agentCommand
 		'override the local config file path to compare',
 	)
 	.action(async (agentId: string, options: {configFile?: string}) => {
-		await runAgentConfigure({agent: agentId, configFile: options.configFile});
+		const result = await runAgentConfigure({
+			agent: agentId,
+			configFile: options.configFile,
+		});
+		const {waitUntilExit} = render(<AgentConfigure result={result} />);
+		await waitUntilExit();
+		if (result.counts.added > 0 || result.counts.changed > 0) {
+			process.exit(1);
+		}
 	});
 
 program.hook('preAction', (_thisCommand, actionCommand) => {
