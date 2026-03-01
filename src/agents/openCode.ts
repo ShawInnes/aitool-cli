@@ -25,10 +25,10 @@ export class OpenCodeAgent implements Agent {
 	readonly id = 'opencode';
 	readonly displayName = 'Open Code';
 	readonly url = 'https://opencode.ai';
-	readonly githubUrl = 'https://github.com/opencode-ai/opencode';
-	readonly installUrl = 'https://opencode.ai/docs/install';
+	readonly githubUrl = 'https://github.com/anomalyco/opencode';
+	readonly installUrl = 'https://opencode.ai/docs#install';
 	readonly installCommands = {
-		mac: 'brew install opencode',
+		mac: 'curl -fsSL https://opencode.ai/install | bash',
 		linux: 'curl -fsSL https://opencode.ai/install | bash',
 		windows: 'npm install -g opencode-ai@latest',
 	};

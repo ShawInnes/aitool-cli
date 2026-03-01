@@ -25,9 +25,11 @@ export class ContinueAgent implements Agent {
 	readonly githubUrl = 'https://github.com/continuedev/continue';
 	readonly installUrl = 'https://docs.continue.dev/cli/quickstart';
 	readonly installCommands = {
-		mac: 'npm install -g @continuedev/cli',
-		linux: 'npm install -g @continuedev/cli',
-		windows: 'npm install -g @continuedev/cli',
+		mac: 'curl -fsSL https://raw.githubusercontent.com/continuedev/continue/main/extensions/cli/scripts/install.sh | bash',
+		linux:
+			'curl -fsSL https://raw.githubusercontent.com/continuedev/continue/main/extensions/cli/scripts/install.sh | bash',
+		windows:
+			'irm https://raw.githubusercontent.com/continuedev/continue/main/extensions/cli/scripts/install.ps1 | iex',
 	};
 
 	private readonly exec: Executor;

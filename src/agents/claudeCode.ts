@@ -27,9 +27,9 @@ export class ClaudeCodeAgent implements Agent {
 	readonly url = 'https://claude.ai/code';
 	readonly installUrl = 'https://docs.anthropic.com/en/docs/claude-code/setup';
 	readonly installCommands = {
-		mac: 'npm install -g @anthropic-ai/claude-code',
-		linux: 'npm install -g @anthropic-ai/claude-code',
-		windows: 'npm install -g @anthropic-ai/claude-code',
+		mac: 'curl -fsSL https://claude.ai/install.sh | bash',
+		linux: 'curl -fsSL https://claude.ai/install.sh | bash',
+		windows: 'irm https://claude.ai/install.ps1 | iex',
 	};
 	readonly templatePath = 'claudeCode.json';
 

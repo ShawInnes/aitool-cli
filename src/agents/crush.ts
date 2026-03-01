@@ -28,8 +28,8 @@ export class CrushAgent implements Agent {
 	readonly installUrl = 'https://github.com/charmbracelet/crush#installation';
 	readonly installCommands = {
 		mac: 'brew install charmbracelet/tap/crush',
-		linux: 'go install github.com/charmbracelet/crush@latest',
-		windows: 'go install github.com/charmbracelet/crush@latest',
+		linux: 'npm install -g @charmland/crush',
+		windows: 'winget install charmbracelet.crush',
 	};
 	readonly templatePath = 'crush.json';
 
