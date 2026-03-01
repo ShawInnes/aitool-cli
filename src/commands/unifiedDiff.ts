@@ -133,3 +133,39 @@ export function unifiedDiff(
 
 	return [`--- ${fromLabel}`, `+++ ${toLabel}`, ...hunkStrings].join('\n');
 }
+
+const RESET = '\x1b[0m';
+const BOLD = '\x1b[1m';
+const RED = '\x1b[31m';
+const GREEN = '\x1b[32m';
+const CYAN = '\x1b[36m';
+const DIM = '\x1b[2m';
+
+/**
+ * Applies ANSI colours to a unified diff string.
+ * Call only when writing to a TTY — plain text is unchanged.
+ */
+export function colorizeDiff(diff: string): string {
+	return diff
+		.split('\n')
+		.map(line => {
+			if (line.startsWith('--- ') || line.startsWith('+++ ')) {
+				return `${BOLD}${DIM}${line}${RESET}`;
+			}
+
+			if (line.startsWith('@@')) {
+				return `${CYAN}${line}${RESET}`;
+			}
+
+			if (line.startsWith('-')) {
+				return `${RED}${line}${RESET}`;
+			}
+
+			if (line.startsWith('+')) {
+				return `${GREEN}${line}${RESET}`;
+			}
+
+			return line;
+		})
+		.join('\n');
+}

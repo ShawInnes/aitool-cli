@@ -1,6 +1,6 @@
 // tests/unifiedDiff_spec.ts
 import {describe, expect, test} from 'bun:test';
-import {unifiedDiff} from '../src/commands/unifiedDiff.js';
+import {unifiedDiff, colorizeDiff} from '../src/commands/unifiedDiff.js';
 
 describe('unifiedDiff', () => {
 	test('returns empty string for identical inputs', () => {
@@ -76,5 +76,50 @@ describe('unifiedDiff', () => {
 		const result = unifiedDiff(from, to, 'a', 'b', 3);
 		const hunkHeaders = result.match(/^@@/gm);
 		expect(hunkHeaders).toHaveLength(2);
+	});
+});
+
+describe('colorizeDiff', () => {
+	test('wraps --- header lines in bold+dim ANSI codes', () => {
+		const result = colorizeDiff('--- a/file');
+		expect(result).toContain('\x1b[1m');
+		expect(result).toContain('\x1b[2m');
+		expect(result).toContain('--- a/file');
+		expect(result).toContain('\x1b[0m');
+	});
+
+	test('wraps +++ header lines in bold+dim ANSI codes', () => {
+		const result = colorizeDiff('+++ b/file');
+		expect(result).toContain('\x1b[1m');
+		expect(result).toContain('+++ b/file');
+	});
+
+	test('wraps @@ hunk headers in cyan', () => {
+		const result = colorizeDiff('@@ -1,3 +1,3 @@');
+		expect(result).toContain('\x1b[36m');
+		expect(result).toContain('@@ -1,3 +1,3 @@');
+	});
+
+	test('wraps - lines in red', () => {
+		const result = colorizeDiff('-removed line');
+		expect(result).toContain('\x1b[31m');
+		expect(result).toContain('-removed line');
+	});
+
+	test('wraps + lines in green', () => {
+		const result = colorizeDiff('+added line');
+		expect(result).toContain('\x1b[32m');
+		expect(result).toContain('+added line');
+	});
+
+	test('leaves context lines unstyled', () => {
+		const line = ' unchanged line';
+		expect(colorizeDiff(line)).toBe(line);
+	});
+
+	test('does not apply red/green to --- and +++ headers', () => {
+		// --- and +++ are headers, not del/add lines — they get bold+dim, not red/green
+		expect(colorizeDiff('--- a/f')).not.toContain('\x1b[31m');
+		expect(colorizeDiff('+++ b/f')).not.toContain('\x1b[32m');
 	});
 });

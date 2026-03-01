@@ -18,7 +18,7 @@ import {runAuthLogout} from './commands/authLogout.js';
 import {warnIfTokenExpiring} from './commands/tokenWarning.js';
 import {runAgentCheck} from './commands/agentCheck.js';
 import {runAgentConfigure, applyPatch} from './commands/agentConfigure.js';
-import {unifiedDiff} from './commands/unifiedDiff.js';
+import {unifiedDiff, colorizeDiff} from './commands/unifiedDiff.js';
 import {runAgentInstall} from './commands/agentInstall.js';
 import {runAgentList} from './commands/agentList.js';
 import {AGENT_REGISTRY} from './agents/index.js';
@@ -422,7 +422,9 @@ agentCommand
 						`a/${result.localConfigPath}`,
 						`b/${result.localConfigPath}`,
 					);
-					console.log(diff);
+					console.log(
+						process.stdout.isTTY ? colorizeDiff(diff) : diff,
+					);
 				}
 
 				return;
