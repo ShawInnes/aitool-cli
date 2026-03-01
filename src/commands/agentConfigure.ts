@@ -1,10 +1,9 @@
 // src/commands/agentConfigure.ts
 import {readFileSync, writeFileSync, existsSync} from 'node:fs';
-import {resolve, dirname} from 'node:path';
-import {fileURLToPath} from 'node:url';
 import * as jsondiffpatch from 'jsondiffpatch';
 import {type Delta} from 'jsondiffpatch';
 import {AGENT_REGISTRY, type Agent} from '../agents/index.js';
+import {TEMPLATES} from '../templates/index.js';
 
 export type AgentConfigureOptions = {
 	/** Agent id to configure (e.g. "claude-code"). */
@@ -132,17 +131,14 @@ function loadTemplate(agent: Agent): Record<string, unknown> {
 		);
 	}
 
-	const thisDir = dirname(fileURLToPath(import.meta.url));
-	const templateFile = resolve(thisDir, '..', 'templates', agent.templatePath);
-
-	if (!existsSync(templateFile)) {
-		throw new Error(`Template file not found: ${templateFile}`);
+	const template = TEMPLATES[agent.templatePath];
+	if (!template) {
+		throw new Error(
+			`Template "${agent.templatePath}" is not bundled. Add it to src/templates/index.ts.`,
+		);
 	}
 
-	return JSON.parse(readFileSync(templateFile, 'utf8')) as Record<
-		string,
-		unknown
-	>;
+	return template;
 }
 
 /** Resolve the local config file path, using override or agent default. */
