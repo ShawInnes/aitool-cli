@@ -3,7 +3,7 @@
 | supported | tag          | name               | website                             | install                                                                                         | github                                        | description                                                                         | opensource | config file (macOS/Linux)          | config file (Windows)                 |
 | --------- | ------------ | ------------------ | ----------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------- | ---------- | ---------------------------------- | ------------------------------------- |
 | ✅        | claude       | Claude Code        | https://claude.ai/code              | [Install](https://docs.anthropic.com/en/docs/claude-code/setup)                                 | —                                             | Anthropic's agentic AI coding tool for the terminal                                 | 🔒         | `~/.claude/settings.json`          | `~/.claude/settings.json`             |
-| ✅        | opencode     | OpenCode           | https://opencode.ai                 | [Install](https://opencode.ai/docs/install)                                                     | https://github.com/opencode-ai/opencode       | Open source terminal AI coding agent built by the creators of terminal.shop         | ✅         | `~/.config/opencode/opencode.json` | `~/.config/opencode/opencode.json`    |
+| ✅        | opencode     | OpenCode           | https://opencode.ai                 | [Install](https://opencode.ai/docs#install)                                                     | https://github.com/anomalyco/opencode         | Open source terminal AI coding agent built by the creators of terminal.shop         | ✅         | `~/.config/opencode/opencode.json` | `~/.config/opencode/opencode.json`    |
 | ✅        | crush        | Crush              | https://charm.land                  | [Install](https://github.com/charmbracelet/crush#installation)                                  | https://github.com/charmbracelet/crush        | Glamorous agentic terminal coding agent by Charmbracelet (successor to OpenCode)    | ✅         | `~/.config/crush/crush.json`       | `%LOCALAPPDATA%\crush\crush.json`     |
 |           | codex        | Codex              | https://openai.com/codex            | [Install](https://github.com/openai/codex#quickstart)                                           | https://github.com/openai/codex               | OpenAI's lightweight open-source coding agent for the terminal                      | ✅         | —                                  | —                                     |
 |           | gemini       | Gemini CLI         | https://geminicli.com               | [Install](https://github.com/google-gemini/gemini-cli#quickstart)                               | https://github.com/google-gemini/gemini-cli   | Google's open-source AI agent that brings Gemini into your terminal                 | ✅         | —                                  | —                                     |
@@ -31,11 +31,47 @@
 |           | amp          | Amp                | https://ampcode.com                 | [Install](https://ampcode.com/download)                                                         | —                                             | AI coding agent for teams by Sourcegraph with CLI and VS Code extension             | 🔒         | —                                  | —                                     |
 |           | qoder        | Qoder              | https://qoder.com                   | [Install](https://qoder.com)                                                                    | —                                             | Alibaba Cloud's agentic coding platform with autonomous Quest Mode                  | 🔒         | —                                  | —                                     |
 |           | command-code | Command Code       | https://commandcode.ai              | [Install](https://commandcode.ai)                                                               | https://github.com/CommandCodeAI/command-code | AI coding agent that learns your coding style via neuro-symbolic AI                 | ✅         | —                                  | —                                     |
-| ✅        | continue     | Continue           | https://continue.dev                | [Install](https://docs.continue.dev/install/vscode)                                             | https://github.com/continuedev/continue       | Open source AI coding agent for VS Code and JetBrains with custom assistant support | ✅         | `~/.continue/config.yaml`          | `%USERPROFILE%\.continue\config.yaml` |
+| ✅        | continue     | Continue           | https://continue.dev                | [Install](https://docs.continue.dev/cli/quickstart)                                             | https://github.com/continuedev/continue       | Open source AI coding agent for VS Code and JetBrains with custom assistant support | ✅         | `~/.continue/config.yaml`          | `%USERPROFILE%\.continue\config.yaml` |
 |           | amazon-q     | Amazon Q Developer | https://aws.amazon.com/q/developer  | [Install](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/q-install-instructions.html) | https://github.com/aws/amazon-q-developer-cli | AWS AI coding assistant with agentic terminal chat and IDE integration              | ✅         | —                                  | —                                     |
 |           | devin        | Devin              | https://devin.ai                    | [Install](https://devin.ai)                                                                     | —                                             | Cognition's autonomous AI software engineer that handles full development workflows | 🔒         | —                                  | —                                     |
 |           | augment      | Augment Code       | https://augmentcode.com             | [Install](https://www.augmentcode.com/download)                                                 | —                                             | AI coding agent with deep codebase understanding, ranked #1 on SWE-bench Verified   | 🔒         | —                                  | —                                     |
 |           | replit       | Replit Agent       | https://replit.com/products/agent   | [Install](https://replit.com/products/agent)                                                    | —                                             | Autonomous web app builder that builds, tests, and fixes apps from natural language | 🔒         | —                                  | —                                     |
+
+## Install Commands
+
+Install commands for supported agents, by platform:
+
+### Claude Code
+
+| platform | command                                           |
+| -------- | ------------------------------------------------- |
+| macOS    | `curl -fsSL https://claude.ai/install.sh \| bash` |
+| Linux    | `curl -fsSL https://claude.ai/install.sh \| bash` |
+| Windows  | `irm https://claude.ai/install.ps1 \| iex`        |
+
+### OpenCode
+
+| platform | command                                          |
+| -------- | ------------------------------------------------ |
+| macOS    | `curl -fsSL https://opencode.ai/install \| bash` |
+| Linux    | `curl -fsSL https://opencode.ai/install \| bash` |
+| Windows  | `npm install -g opencode-ai@latest`              |
+
+### Crush
+
+| platform | command                                |
+| -------- | -------------------------------------- |
+| macOS    | `brew install charmbracelet/tap/crush` |
+| Linux    | `npm install -g @charmland/crush`      |
+| Windows  | `winget install charmbracelet.crush`   |
+
+### Continue
+
+| platform | command                                                                                                            |
+| -------- | ------------------------------------------------------------------------------------------------------------------ |
+| macOS    | `curl -fsSL https://raw.githubusercontent.com/continuedev/continue/main/extensions/cli/scripts/install.sh \| bash` |
+| Linux    | `curl -fsSL https://raw.githubusercontent.com/continuedev/continue/main/extensions/cli/scripts/install.sh \| bash` |
+| Windows  | `irm https://raw.githubusercontent.com/continuedev/continue/main/extensions/cli/scripts/install.ps1 \| iex`        |
 
 ## Notable Findings
 
