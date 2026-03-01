@@ -20,7 +20,7 @@
 		"release": "npm version patch --message 'chore: release v%s'",
 		"release:minor": "npm version minor --message 'chore: release v%s'",
 		"release:major": "npm version major --message 'chore: release v%s'",
-		"test": "prettier --check src/ && xo src/ && ava"
+		"test": "prettier --check src/ && xo src/"
 	},
 	"files": [
 		"dist"
@@ -38,7 +38,6 @@
 		"@types/bun": "^1.3.9",
 		"@types/react": "^19.2.14",
 		"@vdemedes/prettier-config": "^2.0.1",
-		"ava": "^7.0.0",
 		"chalk": "^5.6.2",
 		"eslint-config-xo-react": "^0.29.0",
 		"eslint-plugin-react": "^7.37.5",
@@ -48,15 +47,6 @@
 		"ts-node": "^10.9.2",
 		"typescript": "^5.9.3",
 		"xo": "^1.2.3"
-	},
-	"ava": {
-		"extensions": {
-			"ts": "module",
-			"tsx": "module"
-		},
-		"nodeArguments": [
-			"--loader=ts-node/esm"
-		]
 	},
 	"xo": [
 		{

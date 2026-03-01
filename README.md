@@ -137,3 +137,9 @@ Build all platform binaries:
 ```bash
 bun run build:all
 ```
+
+
+### Experiment - BD/Beads for Issue Tracking
+
+sudo bash -c 'curl -L https://github.com/dolthub/dolt/releases/latest/download/install.sh | bash'
+curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash

@@ -1,5 +1,9 @@
 # Development Rules
 
+## Work Tracking
+
+- Use 'bd' for task tracking
+
 ## Language
 
 - Always use **TypeScript**. No plain JavaScript files.
@@ -23,3 +27,5 @@
 - Action handlers in `src/cli.tsx` must only: extract options, determine TUI vs CLI mode, then delegate to execution functions. No business logic in action handlers.
 - Execution functions in `src/commands/` must **not** import Commander — they must be callable by both CLI action handlers and TUI components without modification.
 - Global options (e.g. `--config-dir`, `--no-tui`) are defined on the root `program` only. Per-command options are defined on their respective subcommands only.
+
+
