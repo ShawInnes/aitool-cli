@@ -362,6 +362,7 @@ agentCommand
 
 agentCommand
 	.command('configure [agent-id]')
+	.aliases(['config'])
 	.description(
 		"Diff an agent's local config file against its bundled template. " +
 			'Shows keys that are missing, changed, or only present locally. ' +
@@ -414,17 +415,14 @@ agentCommand
 				if (!result.diff) {
 					console.log('No changes — local config matches template.');
 				} else {
-					const templateJson =
-						JSON.stringify(result.template, null, 2) + '\n';
+					const templateJson = JSON.stringify(result.template, null, 2) + '\n';
 					const diff = unifiedDiff(
 						result.localContent,
 						templateJson,
 						`a/${result.localConfigPath}`,
 						`b/${result.localConfigPath}`,
 					);
-					console.log(
-						process.stdout.isTTY ? colorizeDiff(diff) : diff,
-					);
+					console.log(process.stdout.isTTY ? colorizeDiff(diff) : diff);
 				}
 
 				return;
