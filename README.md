@@ -105,19 +105,79 @@ Usage
   $ aitool [command]
 
 Commands
+  agent     Manage and check AI coding agents
+  skills    Manage agent skills
   update    Update to the latest version
   version   Print the current version
 
 Options
-  --name  Your name
+  --json    Output as JSON
+  --tui     Force TUI rendering
 
 Examples
-  $ aitool --name=Jane
-  Hello, Jane
-
+  $ aitool agent check
+  $ aitool skills install https://github.com/org/my-skills.git
+  $ aitool skills update
   $ aitool version
   $ aitool update
 ```
+
+## Managing Skills
+
+Skills are reusable instruction sets for AI coding agents. The `skills` command installs them from
+a Git repository and symlinks them into `~/.claude/skills/` and `~/.agents/skills/` so agents can
+discover and use them.
+
+### Install skills from a repo
+
+```bash
+aitool skills install https://github.com/org/my-skills.git
+# or via SSH
+aitool skills install git@github.com:org/my-skills.git
+```
+
+The repo is cloned into `~/.agent-skills/<repo-name>` and each skill is symlinked into the agent
+skill directories. Re-running install on an already-present skill is safe — existing links are
+skipped.
+
+### Update installed skills
+
+```bash
+aitool skills update
+```
+
+Pulls the latest changes for every installed skills repo and links any newly added skills.
+
+### Skills repo structure
+
+A skills repository only needs a top-level `skills/` folder. Each subdirectory inside it is one
+skill:
+
+```
+my-skills/
+└── skills/
+    ├── commit/
+    │   └── SKILL.md
+    ├── testing/
+    │   └── SKILL.md
+    └── code-review/
+        └── SKILL.md
+```
+
+Each `SKILL.md` has a short YAML front matter block followed by the skill's instructions:
+
+```markdown
+---
+name: commit
+description: Create a git commit with a conventional commit message
+---
+
+## Instructions
+
+...
+```
+
+That's the full required structure — no config files, manifests, or build steps needed.
 
 ## Releases
 
