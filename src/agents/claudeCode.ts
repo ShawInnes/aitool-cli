@@ -1,4 +1,4 @@
-// src/agents/claudeCode.ts
+// Src/agents/claudeCode.ts
 import {homedir} from 'node:os';
 import {join} from 'node:path';
 import {execSync as nodeExecSync} from 'node:child_process';
@@ -22,26 +22,41 @@ import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
  *  - Typical paths: ~/.local/bin/claude, ~/.claude/bin/claude
  */
 export class ClaudeCodeAgent implements Agent {
-	readonly id = 'claude-code';
-	readonly displayName = 'Claude Code';
-	readonly url = 'https://claude.ai/code';
-	readonly installUrl = 'https://docs.anthropic.com/en/docs/claude-code/setup';
+	get id() {
+		return 'claude-code';
+	}
+
+	get displayName() {
+		return 'Claude Code';
+	}
+
+	get url() {
+		return 'https://claude.ai/code';
+	}
+
+	get installUrl() {
+		return 'https://docs.anthropic.com/en/docs/claude-code/setup';
+	}
+
 	readonly installCommands = {
 		mac: 'curl -fsSL https://claude.ai/install.sh | bash',
 		linux: 'curl -fsSL https://claude.ai/install.sh | bash',
 		windows: 'irm https://claude.ai/install.ps1 | iex',
 	};
-	readonly templatePath = 'claudeCode.json';
 
-	defaultConfigFilePath(): string {
-		// Same path on all platforms: ~/.claude/settings.json
-		return join(homedir(), '.claude', 'settings.json');
+	get templatePath() {
+		return 'claudeCode.json';
 	}
 
 	private readonly exec: Executor;
 
 	constructor(exec: Executor = nodeExecSync as unknown as Executor) {
 		this.exec = exec;
+	}
+
+	defaultConfigFilePath(): string {
+		// Same path on all platforms: ~/.claude/settings.json
+		return join(homedir(), '.claude', 'settings.json');
 	}
 
 	async check(): Promise<AgentCheckResult> {

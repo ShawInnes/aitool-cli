@@ -1,4 +1,4 @@
-// src/commands/unifiedDiff.ts
+// Src/commands/unifiedDiff.ts
 
 type Edit = {kind: 'eq' | 'del' | 'add'; line: string};
 type AnnotatedEdit = Edit & {
@@ -67,16 +67,16 @@ export function unifiedDiff(
 	// Annotate each edit with 1-based line numbers in both files
 	let fromLine = 1;
 	let toLine = 1;
-	const annotated: AnnotatedEdit[] = edits.map(e => {
-		const entry: AnnotatedEdit = {...e, fl: fromLine, tl: toLine};
-		if (e.kind !== 'add') fromLine++;
-		if (e.kind !== 'del') toLine++;
+	const annotated: AnnotatedEdit[] = edits.map(edit => {
+		const entry: AnnotatedEdit = {...edit, fl: fromLine, tl: toLine};
+		if (edit.kind !== 'add') fromLine++;
+		if (edit.kind !== 'del') toLine++;
 		return entry;
 	});
 
 	// Find the indices of all changed edits
 	const changeIdxs = annotated
-		.map((e, idx) => (e.kind !== 'eq' ? idx : -1))
+		.map((entry, idx) => (entry.kind === 'eq' ? -1 : idx))
 		.filter(idx => idx >= 0);
 
 	if (changeIdxs.length === 0) return '';
@@ -104,24 +104,24 @@ export function unifiedDiff(
 	const hunkStrings = ranges.map(range => {
 		const slice = annotated.slice(range.start, range.end + 1);
 
-		const fromStart = slice.find(e => e.kind !== 'add')?.fl ?? 0;
-		const toStart = slice.find(e => e.kind !== 'del')?.tl ?? 0;
+		const fromStart = slice.find(entry => entry.kind !== 'add')?.fl ?? 0;
+		const toStart = slice.find(entry => entry.kind !== 'del')?.tl ?? 0;
 
 		let fromCount = 0;
 		let toCount = 0;
 		const lines: string[] = [];
 
-		for (const e of slice) {
-			if (e.kind === 'eq') {
+		for (const entry of slice) {
+			if (entry.kind === 'eq') {
 				fromCount++;
 				toCount++;
-				lines.push(' ' + e.line);
-			} else if (e.kind === 'del') {
+				lines.push(' ' + entry.line);
+			} else if (entry.kind === 'del') {
 				fromCount++;
-				lines.push('-' + e.line);
+				lines.push('-' + entry.line);
 			} else {
 				toCount++;
-				lines.push('+' + e.line);
+				lines.push('+' + entry.line);
 			}
 		}
 
@@ -134,12 +134,12 @@ export function unifiedDiff(
 	return [`--- ${fromLabel}`, `+++ ${toLabel}`, ...hunkStrings].join('\n');
 }
 
-const RESET = '\x1b[0m';
-const BOLD = '\x1b[1m';
-const RED = '\x1b[31m';
-const GREEN = '\x1b[32m';
-const CYAN = '\x1b[36m';
-const DIM = '\x1b[2m';
+const RESET = '\u001B[0m';
+const BOLD = '\u001B[1m';
+const RED = '\u001B[31m';
+const GREEN = '\u001B[32m';
+const CYAN = '\u001B[36m';
+const DIM = '\u001B[2m';
 
 /**
  * Applies ANSI colours to a unified diff string.

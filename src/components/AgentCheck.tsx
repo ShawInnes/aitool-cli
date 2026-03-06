@@ -1,4 +1,4 @@
-// src/components/AgentCheck.tsx
+// Src/components/AgentCheck.tsx
 import {useEffect} from 'react';
 import {Box, Text, useApp} from 'ink';
 import {type AgentCheckSummary} from '../commands/agentCheck.js';

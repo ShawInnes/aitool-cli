@@ -1,4 +1,4 @@
-// src/components/AgentInstall.tsx
+// Src/components/AgentInstall.tsx
 import {useEffect} from 'react';
 import {Box, Text, useApp} from 'ink';
 import {type AgentInstallResult} from '../commands/agentInstall.js';
@@ -62,19 +62,19 @@ export default function AgentInstall({result}: Props) {
 					</Box>
 				)}
 
-				{installCommands && (
+				{installCommands ? (
 					<Box flexDirection="column" marginTop={1}>
-						{installCommands.mac && (
+						{installCommands.mac ? (
 							<CmdRow label="macOS" command={installCommands.mac} />
-						)}
-						{installCommands.linux && (
+						) : null}
+						{installCommands.linux ? (
 							<CmdRow label="Linux" command={installCommands.linux} />
-						)}
-						{installCommands.windows && (
+						) : null}
+						{installCommands.windows ? (
 							<CmdRow label="Windows" command={installCommands.windows} />
-						)}
+						) : null}
 					</Box>
-				)}
+				) : null}
 			</Box>
 		</Box>
 	);

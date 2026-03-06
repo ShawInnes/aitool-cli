@@ -86,8 +86,8 @@ program
 
 			if (
 				!isTuiMode(globalOptions) ||
-				options.configUrl ||
-				options.configFile ||
+				options.configUrl !== undefined ||
+				options.configFile !== undefined ||
 				options.auto
 			) {
 				let result: SetupResult;
@@ -123,8 +123,10 @@ program
 				const {unmount, waitUntilExit} = render(
 					<SetupWizard
 						configDir={configDir}
-						forceReset={options.reset}
-						onComplete={() => unmount()}
+						isForceReset={options.reset}
+						onComplete={() => {
+							unmount();
+						}}
 					/>,
 				);
 				await waitUntilExit();
@@ -303,9 +305,7 @@ agentCommand
 	)
 	.option('--json', 'output results as JSON')
 	.action(async (agentId: string | undefined, options: {json?: boolean}) => {
-		const globalOptions = (
-			agentCommand.parent as typeof program
-		).opts<GlobalOptions>();
+		const globalOptions = agentCommand.parent!.opts<GlobalOptions>();
 		const tui = !options.json && isTuiMode(globalOptions);
 		const results = await runAgentCheck({
 			agent: agentId,
@@ -326,9 +326,7 @@ agentCommand
 	)
 	.option('--json', 'output result as JSON')
 	.action(async (agentId: string | undefined, options: {json?: boolean}) => {
-		const globalOptions = (
-			agentCommand.parent as typeof program
-		).opts<GlobalOptions>();
+		const globalOptions = agentCommand.parent!.opts<GlobalOptions>();
 		const tui = !options.json && isTuiMode(globalOptions);
 
 		if (!agentId) {
@@ -342,10 +340,10 @@ agentCommand
 			const {waitUntilExit: waitForSelection} = render(
 				<AgentSelector
 					agents={AGENT_REGISTRY}
+					title="Agent Install"
 					onSelect={agent => {
 						selectedId = agent.id;
 					}}
-					title="Agent Install"
 				/>,
 			);
 			await waitForSelection();
@@ -383,9 +381,7 @@ agentCommand
 			agentId: string | undefined,
 			options: {configFile?: string; yes?: boolean; dryRun?: boolean},
 		) => {
-			const globalOptions = (
-				agentCommand.parent as typeof program
-			).opts<GlobalOptions>();
+			const globalOptions = agentCommand.parent!.opts<GlobalOptions>();
 			const tui = isTuiMode(globalOptions);
 
 			if (!agentId) {
@@ -399,10 +395,10 @@ agentCommand
 				const {waitUntilExit: waitForSelection} = render(
 					<AgentSelector
 						agents={AGENT_REGISTRY}
+						title="Agent Configure"
 						onSelect={agent => {
 							selectedId = agent.id;
 						}}
-						title="Agent Configure"
 					/>,
 				);
 				await waitForSelection();
@@ -416,9 +412,7 @@ agentCommand
 			});
 
 			if (options.dryRun) {
-				if (!result.diff) {
-					console.log('No changes — local config matches template.');
-				} else {
+				if (result.diff) {
 					const templateJson = JSON.stringify(result.template, null, 2) + '\n';
 					const diff = unifiedDiff(
 						result.localContent,
@@ -427,6 +421,8 @@ agentCommand
 						`b/${result.localConfigPath}`,
 					);
 					console.log(process.stdout.isTTY ? colorizeDiff(diff) : diff);
+				} else {
+					console.log('No changes — local config matches template.');
 				}
 
 				return;
@@ -466,9 +462,7 @@ skillsCommand
 	)
 	.option('--json', 'output result as JSON')
 	.action(async (repoUrl: string, options: {json?: boolean}) => {
-		const globalOptions = (
-			skillsCommand.parent as typeof program
-		).opts<GlobalOptions>();
+		const globalOptions = skillsCommand.parent!.opts<GlobalOptions>();
 		const tui = !options.json && isTuiMode(globalOptions);
 
 		const result = runSkillsInstall({
@@ -490,9 +484,7 @@ skillsCommand
 	)
 	.option('--json', 'output results as JSON')
 	.action(async (options: {json?: boolean}) => {
-		const globalOptions = (
-			skillsCommand.parent as typeof program
-		).opts<GlobalOptions>();
+		const globalOptions = skillsCommand.parent!.opts<GlobalOptions>();
 		const tui = !options.json && isTuiMode(globalOptions);
 
 		const results = runSkillsUpdate({
@@ -525,7 +517,9 @@ program.hook('preAction', (_thisCommand, actionCommand) => {
 	warnIfTokenExpiring(configDir);
 });
 
-program.parseAsync().catch((error: Error) => {
-	console.error(`Error: ${error.message}`);
+try {
+	await program.parseAsync();
+} catch (error: unknown) {
+	console.error(`Error: ${(error as Error).message}`);
 	process.exit(1);
-});
+}

@@ -1,10 +1,10 @@
-// src/components/ConfirmSelector.tsx
+// Src/components/ConfirmSelector.tsx
 import {Box, Text, useInput} from 'ink';
 import {useState} from 'react';
 
 type Props = {
-	onConfirm: () => void;
-	onCancel: () => void;
+	readonly onConfirm: () => void;
+	readonly onCancel: () => void;
 };
 
 /**

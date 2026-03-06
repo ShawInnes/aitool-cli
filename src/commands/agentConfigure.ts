@@ -1,4 +1,4 @@
-// src/commands/agentConfigure.ts
+// Src/commands/agentConfigure.ts
 import {copyFileSync, readFileSync, writeFileSync, existsSync} from 'node:fs';
 import * as jsondiffpatch from 'jsondiffpatch';
 import {type Delta} from 'jsondiffpatch';
@@ -28,7 +28,7 @@ export type AgentConfigureResult = {
 	template: Record<string, unknown>;
 	/** Raw content of the local config file as read from disk. */
 	localContent: string;
-	/** undefined when files are identical */
+	/** Undefined when files are identical */
 	diff: Record<string, DiffNode> | undefined;
 	/** Counts for the summary line */
 	counts: {added: number; changed: number; removed: number};
@@ -66,14 +66,14 @@ export function parseDelta(delta: unknown): DiffNode | undefined {
 
 	// Object node — recurse into children, skipping jsondiffpatch internal markers
 	if (typeof delta === 'object') {
-		const obj = delta as Record<string, unknown>;
+		const object = delta as Record<string, unknown>;
 
 		// Array diff: _t === 'a' means this is an array diff node
-		if (obj['_t'] === 'a') {
+		if (object['_t'] === 'a') {
 			const items: DiffNode[] = [];
-			for (const [key, val] of Object.entries(obj)) {
+			for (const [key, value] of Object.entries(object)) {
 				if (key === '_t') continue;
-				const child = parseDelta(val);
+				const child = parseDelta(value);
 				if (child) items.push(child);
 			}
 
@@ -82,8 +82,8 @@ export function parseDelta(delta: unknown): DiffNode | undefined {
 
 		// Plain object diff
 		const children: Record<string, DiffNode> = {};
-		for (const [key, val] of Object.entries(obj)) {
-			const child = parseDelta(val);
+		for (const [key, value] of Object.entries(object)) {
+			const child = parseDelta(value);
 			if (child) children[key] = child;
 		}
 
@@ -182,16 +182,16 @@ export async function runAgentConfigure(
 	let template: Record<string, unknown>;
 	try {
 		template = loadTemplate(agent);
-	} catch (err) {
-		console.error(`Error: ${(err as Error).message}`);
+	} catch (error) {
+		console.error(`Error: ${(error as Error).message}`);
 		process.exit(1);
 	}
 
 	let localPath: string;
 	try {
 		localPath = resolveLocalConfigFile(agent, configFile);
-	} catch (err) {
-		console.error(`Error: ${(err as Error).message}`);
+	} catch (error) {
+		console.error(`Error: ${(error as Error).message}`);
 		process.exit(1);
 	}
 
@@ -206,9 +206,9 @@ export async function runAgentConfigure(
 	try {
 		localContent = readFileSync(localPath, 'utf8');
 		local = JSON.parse(localContent) as Record<string, unknown>;
-	} catch (err) {
+	} catch (error) {
 		console.error(
-			`Failed to parse local config at ${localPath}: ${(err as Error).message}`,
+			`Failed to parse local config at ${localPath}: ${(error as Error).message}`,
 		);
 		process.exit(1);
 	}
@@ -235,19 +235,15 @@ export async function runAgentConfigure(
 	const root = parseDelta(rawDelta);
 	const diff = root?.kind === 'object' ? root.children : undefined;
 
-	const counts = diff
-		? Object.values(diff).reduce(
-				(acc, node) => {
-					const c = countChanges(node);
-					return {
-						added: acc.added + c.added,
-						changed: acc.changed + c.changed,
-						removed: acc.removed + c.removed,
-					};
-				},
-				{added: 0, changed: 0, removed: 0},
-			)
-		: {added: 0, changed: 0, removed: 0};
+	const counts = {added: 0, changed: 0, removed: 0};
+	if (diff) {
+		for (const node of Object.values(diff)) {
+			const c = countChanges(node);
+			counts.added += c.added;
+			counts.changed += c.changed;
+			counts.removed += c.removed;
+		}
+	}
 
 	return {
 		agent: {id: agent.id, displayName: agent.displayName},

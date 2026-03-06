@@ -1,4 +1,4 @@
-// src/components/AgentSelector.tsx
+// Src/components/AgentSelector.tsx
 import {Box, Text, useApp, useInput} from 'ink';
 import {useState} from 'react';
 import {type Agent} from '../agents/agent.js';
@@ -7,14 +7,14 @@ const VISIBLE_COUNT = 8;
 
 type Props = {
 	/** Agents to display in the list. */
-	agents: Agent[];
+	readonly agents: Agent[];
 	/** Called with the chosen agent when the user presses Enter. */
-	onSelect: (agent: Agent) => void;
+	readonly onSelect: (agent: Agent) => void;
 	/**
 	 * Text shown after "aitool — " in the title bar.
 	 * Defaults to "Select Agent".
 	 */
-	title?: string;
+	readonly title?: string;
 };
 
 /**
@@ -53,7 +53,10 @@ export default function AgentSelector({
 		}
 	});
 
-	const visibleAgents = agents.slice(scrollOffset, scrollOffset + VISIBLE_COUNT);
+	const visibleAgents = agents.slice(
+		scrollOffset,
+		scrollOffset + VISIBLE_COUNT,
+	);
 	const canScrollUp = scrollOffset > 0;
 	const canScrollDown = scrollOffset + VISIBLE_COUNT < agents.length;
 
@@ -66,7 +69,7 @@ export default function AgentSelector({
 				paddingX={1}
 				flexDirection="column"
 			>
-				{canScrollUp && <Text color="gray">↑</Text>}
+				{canScrollUp ? <Text color="gray">↑</Text> : null}
 				{visibleAgents.map((agent, i) => {
 					const actualIndex = i + scrollOffset;
 					const isActive = actualIndex === cursor;
@@ -79,7 +82,7 @@ export default function AgentSelector({
 						</Box>
 					);
 				})}
-				{canScrollDown && <Text color="gray">↓</Text>}
+				{canScrollDown ? <Text color="gray">↓</Text> : null}
 			</Box>
 			<Text color="gray">↑↓ navigate · enter select · esc cancel</Text>
 		</Box>

@@ -1,15 +1,15 @@
-// src/agents/index.ts
-export {type Agent, type AgentCheckResult, type Executor} from './agent.js';
-export {ClaudeCodeAgent, claudeCode} from './claudeCode.js';
-export {OpenCodeAgent, openCode} from './openCode.js';
-export {CrushAgent, crush} from './crush.js';
-export {ContinueAgent, continueAgent} from './continue.js';
-
+// Src/agents/index.ts
 import {type Agent} from './agent.js';
 import {claudeCode} from './claudeCode.js';
 import {openCode} from './openCode.js';
 import {crush} from './crush.js';
 import {continueAgent} from './continue.js';
+
+export {type Agent, type AgentCheckResult, type Executor} from './agent.js';
+export {ClaudeCodeAgent, claudeCode} from './claudeCode.js';
+export {OpenCodeAgent, openCode} from './openCode.js';
+export {CrushAgent, crush} from './crush.js';
+export {ContinueAgent, continueAgent} from './continue.js';
 
 /**
  * All registered AI coding agents. Add new agents here to include them

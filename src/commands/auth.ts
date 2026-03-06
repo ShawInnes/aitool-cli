@@ -84,6 +84,104 @@ export async function startDeviceAuth(
 	};
 }
 
+async function delay(ms: number): Promise<void> {
+	return new Promise(resolve => {
+		setTimeout(resolve, ms);
+	});
+}
+
+async function pollOnce(
+	start: DeviceAuthStart,
+	tokenEndpoint: string,
+	clientId: string,
+	configDir: string | undefined,
+	deadline: number,
+	pollInterval: number,
+	onPollAttempt: (() => void) | undefined,
+): Promise<AuthLoginResult> {
+	if (Date.now() >= deadline) {
+		throw new Error(
+			'Device code expired. Please run `aitool auth login` again.',
+		);
+	}
+
+	await delay(pollInterval * 1000);
+	onPollAttempt?.();
+
+	const body = new URLSearchParams({
+		grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+		device_code: start.deviceCode,
+		client_id: clientId,
+	});
+
+	verbose(`POST ${tokenEndpoint}`);
+	const response = await fetch(tokenEndpoint, {
+		method: 'POST',
+		headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+		body: body.toString(),
+	});
+	verbose(`Response: ${response.status} ${response.statusText}`);
+
+	const data = (await response.json()) as unknown;
+
+	if (!response.ok) {
+		const {error} = data as {error?: string};
+		if (error === 'authorization_pending') {
+			return pollOnce(
+				start,
+				tokenEndpoint,
+				clientId,
+				configDir,
+				deadline,
+				pollInterval,
+				onPollAttempt,
+			);
+		}
+
+		if (error === 'slow_down') {
+			return pollOnce(
+				start,
+				tokenEndpoint,
+				clientId,
+				configDir,
+				deadline,
+				pollInterval + 5,
+				onPollAttempt,
+			);
+		}
+
+		if (error === 'expired_token') {
+			throw new Error(
+				'Device code expired. Please run `aitool auth login` again.',
+			);
+		}
+
+		if (error === 'access_denied') {
+			throw new Error('Access denied.');
+		}
+
+		throw new Error(`Token request failed: ${error ?? response.statusText}`);
+	}
+
+	const tokens = TokenResponseSchema.parse(data);
+	const expiresAt = tokens.expires_in
+		? new Date(Date.now() + tokens.expires_in * 1000).toISOString()
+		: undefined;
+
+	const credentials: Credentials = {
+		accessToken: tokens.access_token,
+		tokenType: tokens.token_type,
+		refreshToken: tokens.refresh_token,
+		idToken: tokens.id_token,
+		scope: tokens.scope,
+		expiresAt,
+	};
+
+	writeCredentials(credentials, configDir);
+
+	return {tokenType: tokens.token_type, scope: tokens.scope, expiresAt};
+}
+
 export async function pollForToken(
 	start: DeviceAuthStart,
 	configDir?: string,
@@ -91,73 +189,16 @@ export async function pollForToken(
 ): Promise<AuthLoginResult> {
 	const config = readConfig(configDir);
 	const discovery = await getDiscovery(config, configDir);
-
 	const deadline = Date.now() + start.expiresIn * 1000;
-	let pollInterval = start.interval;
-
-	while (Date.now() < deadline) {
-		await new Promise<void>(resolve =>
-			setTimeout(resolve, pollInterval * 1000),
-		);
-		onPollAttempt?.();
-
-		const body = new URLSearchParams({
-			grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
-			device_code: start.deviceCode,
-			client_id: config.clientId,
-		});
-
-		verbose(`POST ${discovery.token_endpoint}`);
-		const response = await fetch(discovery.token_endpoint, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-			body: body.toString(),
-		});
-		verbose(`Response: ${response.status} ${response.statusText}`);
-
-		const data = (await response.json()) as unknown;
-
-		if (!response.ok) {
-			const {error} = data as {error?: string};
-			if (error === 'authorization_pending') continue;
-			if (error === 'slow_down') {
-				pollInterval += 5;
-				continue;
-			}
-
-			if (error === 'expired_token') {
-				throw new Error(
-					'Device code expired. Please run `aitool auth login` again.',
-				);
-			}
-
-			if (error === 'access_denied') {
-				throw new Error('Access denied.');
-			}
-
-			throw new Error(`Token request failed: ${error ?? response.statusText}`);
-		}
-
-		const tokens = TokenResponseSchema.parse(data);
-		const expiresAt = tokens.expires_in
-			? new Date(Date.now() + tokens.expires_in * 1000).toISOString()
-			: undefined;
-
-		const credentials: Credentials = {
-			accessToken: tokens.access_token,
-			tokenType: tokens.token_type,
-			refreshToken: tokens.refresh_token,
-			idToken: tokens.id_token,
-			scope: tokens.scope,
-			expiresAt,
-		};
-
-		writeCredentials(credentials, configDir);
-
-		return {tokenType: tokens.token_type, scope: tokens.scope, expiresAt};
-	}
-
-	throw new Error('Device code expired. Please run `aitool auth login` again.');
+	return pollOnce(
+		start,
+		discovery.token_endpoint,
+		config.clientId,
+		configDir,
+		deadline,
+		start.interval,
+		onPollAttempt,
+	);
 }
 
 export async function runAuthLogin(
@@ -222,7 +263,13 @@ export async function runTokenRefresh(
 	}
 
 	if (!response.ok) {
-		const text = await response.text().catch(() => response.statusText);
+		let text: string;
+		try {
+			text = await response.text();
+		} catch {
+			text = response.statusText;
+		}
+
 		throw new Error(
 			`Token refresh failed: ${text}. Run \`aitool auth login\` to re-authenticate.`,
 		);

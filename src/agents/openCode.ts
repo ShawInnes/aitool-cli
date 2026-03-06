@@ -1,4 +1,4 @@
-// src/agents/openCode.ts
+// Src/agents/openCode.ts
 import {homedir} from 'node:os';
 import {join} from 'node:path';
 import {execSync as nodeExecSync} from 'node:child_process';
@@ -22,27 +22,45 @@ import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
  *  - Repository: https://github.com/opencode-ai/opencode
  */
 export class OpenCodeAgent implements Agent {
-	readonly id = 'opencode';
-	readonly displayName = 'Open Code';
-	readonly url = 'https://opencode.ai';
-	readonly githubUrl = 'https://github.com/anomalyco/opencode';
-	readonly installUrl = 'https://opencode.ai/docs#install';
+	get id() {
+		return 'opencode';
+	}
+
+	get displayName() {
+		return 'Open Code';
+	}
+
+	get url() {
+		return 'https://opencode.ai';
+	}
+
+	get githubUrl() {
+		return 'https://github.com/anomalyco/opencode';
+	}
+
+	get installUrl() {
+		return 'https://opencode.ai/docs#install';
+	}
+
 	readonly installCommands = {
 		mac: 'curl -fsSL https://opencode.ai/install | bash',
 		linux: 'curl -fsSL https://opencode.ai/install | bash',
 		windows: 'npm install -g opencode-ai@latest',
 	};
-	readonly templatePath = 'opencode.json';
 
-	defaultConfigFilePath(): string {
-		// ~/.config/opencode/opencode.json on all platforms
-		return join(homedir(), '.config', 'opencode', 'opencode.json');
+	get templatePath() {
+		return 'opencode.json';
 	}
 
 	private readonly exec: Executor;
 
 	constructor(exec: Executor = nodeExecSync as unknown as Executor) {
 		this.exec = exec;
+	}
+
+	defaultConfigFilePath(): string {
+		// ~/.config/opencode/opencode.json on all platforms
+		return join(homedir(), '.config', 'opencode', 'opencode.json');
 	}
 
 	async check(): Promise<AgentCheckResult> {

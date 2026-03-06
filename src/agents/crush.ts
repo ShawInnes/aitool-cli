@@ -1,4 +1,4 @@
-// src/agents/crush.ts
+// Src/agents/crush.ts
 import {homedir} from 'node:os';
 import {join} from 'node:path';
 import {execSync as nodeExecSync} from 'node:child_process';
@@ -21,17 +21,41 @@ import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
  *  - Repository: https://github.com/charmbracelet/crush
  */
 export class CrushAgent implements Agent {
-	readonly id = 'crush';
-	readonly displayName = 'Crush';
-	readonly url = 'https://charm.land';
-	readonly githubUrl = 'https://github.com/charmbracelet/crush';
-	readonly installUrl = 'https://github.com/charmbracelet/crush#installation';
+	get id() {
+		return 'crush';
+	}
+
+	get displayName() {
+		return 'Crush';
+	}
+
+	get url() {
+		return 'https://charm.land';
+	}
+
+	get githubUrl() {
+		return 'https://github.com/charmbracelet/crush';
+	}
+
+	get installUrl() {
+		return 'https://github.com/charmbracelet/crush#installation';
+	}
+
 	readonly installCommands = {
 		mac: 'brew install charmbracelet/tap/crush',
 		linux: 'npm install -g @charmland/crush',
 		windows: 'winget install charmbracelet.crush',
 	};
-	readonly templatePath = 'crush.json';
+
+	get templatePath() {
+		return 'crush.json';
+	}
+
+	private readonly exec: Executor;
+
+	constructor(exec: Executor = nodeExecSync as unknown as Executor) {
+		this.exec = exec;
+	}
 
 	defaultConfigFilePath(): string {
 		// Windows: %LOCALAPPDATA%\crush\crush.json
@@ -43,12 +67,6 @@ export class CrushAgent implements Agent {
 		}
 
 		return join(homedir(), '.config', 'crush', 'crush.json');
-	}
-
-	private readonly exec: Executor;
-
-	constructor(exec: Executor = nodeExecSync as unknown as Executor) {
-		this.exec = exec;
 	}
 
 	async check(): Promise<AgentCheckResult> {

@@ -7,29 +7,30 @@ type Step = 'resetting' | 'input' | 'fetching' | 'success' | 'error';
 type Props = {
 	readonly configDir?: string;
 	readonly onComplete?: () => void;
-	readonly forceReset?: boolean;
+	readonly isForceReset?: boolean;
 };
 
 export default function SetupWizard({
 	configDir,
 	onComplete,
-	forceReset,
+	isForceReset,
 }: Props) {
-	const [step, setStep] = useState<Step>(forceReset ? 'resetting' : 'input');
+	const [step, setStep] = useState<Step>(isForceReset ? 'resetting' : 'input');
 	const [inputUrl, setInputUrl] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 
 	useEffect(() => {
-		if (!forceReset) return;
-		resetConfig(configDir)
-			.then(() => {
+		if (!isForceReset) return;
+		void (async () => {
+			try {
+				await resetConfig(configDir);
 				setStep('input');
-			})
-			.catch((error: unknown) => {
+			} catch (error: unknown) {
 				setErrorMessage(error instanceof Error ? error.message : String(error));
 				setStep('error');
-			});
-	}, [configDir, forceReset]);
+			}
+		})();
+	}, [configDir, isForceReset]);
 
 	useInput((input, key) => {
 		if (step === 'input') {

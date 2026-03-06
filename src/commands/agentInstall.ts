@@ -1,4 +1,4 @@
-// src/commands/agentInstall.ts
+// Src/commands/agentInstall.ts
 import {AGENT_REGISTRY} from '../agents/index.js';
 
 export type AgentInstallOptions = {

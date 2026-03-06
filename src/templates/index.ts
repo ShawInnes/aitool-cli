@@ -1,4 +1,4 @@
-// src/templates/index.ts
+// Src/templates/index.ts
 //
 // Static JSON imports so Bun bundles the template files directly into the
 // compiled binary. Filesystem path resolution via import.meta.url fails inside

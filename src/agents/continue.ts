@@ -1,4 +1,4 @@
-// src/agents/continue.ts
+// Src/agents/continue.ts
 import {execSync as nodeExecSync} from 'node:child_process';
 import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
 
@@ -19,11 +19,26 @@ import {type Agent, type AgentCheckResult, type Executor} from './agent.js';
  *  - Repository: https://github.com/continuedev/continue
  */
 export class ContinueAgent implements Agent {
-	readonly id = 'continue';
-	readonly displayName = 'Continue';
-	readonly url = 'https://continue.dev';
-	readonly githubUrl = 'https://github.com/continuedev/continue';
-	readonly installUrl = 'https://docs.continue.dev/cli/quickstart';
+	get id() {
+		return 'continue';
+	}
+
+	get displayName() {
+		return 'Continue';
+	}
+
+	get url() {
+		return 'https://continue.dev';
+	}
+
+	get githubUrl() {
+		return 'https://github.com/continuedev/continue';
+	}
+
+	get installUrl() {
+		return 'https://docs.continue.dev/cli/quickstart';
+	}
+
 	readonly installCommands = {
 		mac: 'curl -fsSL https://raw.githubusercontent.com/continuedev/continue/main/extensions/cli/scripts/install.sh | bash',
 		linux:

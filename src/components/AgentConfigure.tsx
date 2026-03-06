@@ -1,12 +1,12 @@
-// src/components/AgentConfigure.tsx
-import {useState} from 'react';
+// Src/components/AgentConfigure.tsx
+import {useCallback, useState} from 'react';
 import {Box, Text, useApp} from 'ink';
 import {Badge, StatusMessage} from '@inkjs/ui';
-import ConfirmSelector from './ConfirmSelector.js';
 import {
 	type AgentConfigureResult,
 	type DiffNode,
 } from '../commands/agentConfigure.js';
+import ConfirmSelector from './ConfirmSelector.js';
 
 type Props = {
 	readonly result: AgentConfigureResult;
@@ -14,8 +14,8 @@ type Props = {
 };
 
 /** Truncate a JSON value to a readable single-line string. */
-function fmtVal(val: unknown): string {
-	const raw = JSON.stringify(val);
+function fmtValue(value: unknown): string {
+	const raw = JSON.stringify(value);
 	if (raw === undefined) return 'undefined';
 	return raw.length > 80 ? raw.slice(0, 77) + '...' : raw;
 }
@@ -60,11 +60,11 @@ function DiffEntry({
 		return (
 			<Box>
 				<Text color="green">{indent}+ </Text>
-				<Text color="green" bold>
+				<Text bold color="green">
 					{entryKey}
 				</Text>
 				<Text color="gray"> = </Text>
-				<Text color="green">{fmtVal(node.value)}</Text>
+				<Text color="green">{fmtValue(node.value)}</Text>
 			</Box>
 		);
 	}
@@ -73,11 +73,11 @@ function DiffEntry({
 		return (
 			<Box>
 				<Text color="red">{indent}- </Text>
-				<Text color="red" bold>
+				<Text bold color="red">
 					{entryKey}
 				</Text>
 				<Text color="gray"> = </Text>
-				<Text color="red">{fmtVal(node.value)}</Text>
+				<Text color="red">{fmtValue(node.value)}</Text>
 			</Box>
 		);
 	}
@@ -87,17 +87,17 @@ function DiffEntry({
 			<Box flexDirection="column">
 				<Box>
 					<Text color="yellow">{indent}~ </Text>
-					<Text color="yellow" bold>
+					<Text bold color="yellow">
 						{entryKey}
 					</Text>
 				</Box>
 				<Box>
 					<Text color="gray">{indent} template </Text>
-					<Text color="red">{fmtVal(node.templateValue)}</Text>
+					<Text color="red">{fmtValue(node.templateValue)}</Text>
 				</Box>
 				<Box>
 					<Text color="gray">{indent} local </Text>
-					<Text color="green">{fmtVal(node.localValue)}</Text>
+					<Text color="green">{fmtValue(node.localValue)}</Text>
 				</Box>
 			</Box>
 		);
@@ -108,7 +108,7 @@ function DiffEntry({
 			<Box flexDirection="column">
 				<Box>
 					<Text color="cyan">{indent} </Text>
-					<Text color="cyan" bold>
+					<Text bold color="cyan">
 						{entryKey}
 					</Text>
 					<Text color="gray"> {'{'}</Text>
@@ -126,7 +126,7 @@ function DiffEntry({
 			<Box flexDirection="column">
 				<Box>
 					<Text color="cyan">{indent} </Text>
-					<Text color="cyan" bold>
+					<Text bold color="cyan">
 						{entryKey}
 					</Text>
 					<Text color="gray"> [</Text>
@@ -177,16 +177,16 @@ export default function AgentConfigure({result, onPatch}: Props) {
 		hasDiff ? 'confirming' : 'idle',
 	);
 
-	function handleConfirm() {
+	const handleConfirm = useCallback(() => {
 		onPatch();
 		setPatchState('patched');
 		exit();
-	}
+	}, [onPatch, exit]);
 
-	function handleCancel() {
+	const handleCancel = useCallback(() => {
 		setPatchState('cancelled');
 		exit();
-	}
+	}, [exit]);
 
 	return (
 		<Box flexDirection="column" gap={1}>
@@ -224,13 +224,13 @@ export default function AgentConfigure({result, onPatch}: Props) {
 			)}
 
 			{/* Summary badges */}
-			{hasDiff && (
+			{hasDiff ? (
 				<Box gap={2}>
 					<SummaryBadge label="missing" count={counts.added} color="green" />
 					<SummaryBadge label="changed" count={counts.changed} color="yellow" />
 					<SummaryBadge label="local-only" count={counts.removed} color="red" />
 				</Box>
-			)}
+			) : null}
 
 			{/* Confirm prompt / result */}
 			{patchState === 'confirming' && (
