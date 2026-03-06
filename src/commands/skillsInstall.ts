@@ -60,7 +60,12 @@ export function linkSkillEntries(
 		}
 
 		try {
-			fs.symlinkSync(source, target);
+			// On Windows, directory symlinks require elevated privileges or Developer Mode.
+			// Junctions work for directories without special permissions.
+			const isDir = fs.statSync(source).isDirectory();
+			const type =
+				process.platform === 'win32' && isDir ? 'junction' : undefined;
+			fs.symlinkSync(source, target, type);
 			links.push({name: entry, status: 'linked'});
 		} catch (error) {
 			links.push({
