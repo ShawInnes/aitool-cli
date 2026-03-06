@@ -1,6 +1,6 @@
 {
 	"name": "aitool-cli",
-	"version": "1.4.1",
+	"version": "1.4.2",
 	"license": "MIT",
 	"bin": "dist/cli.js",
 	"type": "module",
