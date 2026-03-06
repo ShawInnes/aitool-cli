@@ -1,7 +1,11 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {getAgentSkillsDir, getClaudeSkillsDir} from '../config/paths.js';
+import {
+	getAgentSkillsDir,
+	getClaudeSkillsDir,
+	getAgentsSkillsDir,
+} from '../config/paths.js';
 
 export type SkillLinkResult = {
 	name: string;
@@ -16,6 +20,7 @@ export type SkillsInstallResult = {
 	cloned: boolean;
 	hasSkillsDir: boolean;
 	links: SkillLinkResult[];
+	agentLinks: SkillLinkResult[];
 	error?: string;
 };
 
@@ -31,108 +36,15 @@ function repoNameFromUrl(url: string): string {
 	return separatorIdx >= 0 ? normalized.slice(separatorIdx + 1) : normalized;
 }
 
-function emit(
-	options: {silent?: boolean; json?: boolean},
-	result: SkillsInstallResult,
-	plainText: () => void,
-) {
-	if (options.json) {
-		console.log(JSON.stringify(result, null, 2));
-	} else if (!options.silent) {
-		plainText();
-	}
-}
-
-export function runSkillsInstall(options: {
-	repoUrl: string;
-	silent?: boolean;
-	json?: boolean;
-}): SkillsInstallResult {
-	const {repoUrl, silent, json} = options;
-	const repoName = repoNameFromUrl(repoUrl);
-	const agentSkillsDir = getAgentSkillsDir();
-	const cloneDir = path.join(agentSkillsDir, repoName);
-
-	const base: Omit<SkillsInstallResult, 'cloned' | 'hasSkillsDir' | 'links'> = {
-		repoUrl,
-		repoName,
-		cloneDir,
-	};
-
-	if (!repoName) {
-		const result: SkillsInstallResult = {
-			...base,
-			cloned: false,
-			hasSkillsDir: false,
-			links: [],
-			error: `Cannot parse repo name from URL: ${repoUrl}`,
-		};
-		emit(options, result, () => {
-			console.error(`Error: ${result.error}`);
-		});
-		return result;
-	}
-
-	if (fs.existsSync(cloneDir)) {
-		const result: SkillsInstallResult = {
-			...base,
-			cloned: false,
-			hasSkillsDir: false,
-			links: [],
-			error: `${repoName} is already installed at ${cloneDir}`,
-		};
-		emit(options, result, () => {
-			console.error(`Error: ${result.error}`);
-		});
-		return result;
-	}
-
-	fs.mkdirSync(agentSkillsDir, {recursive: true});
-
-	// Use spawnSync with an args array to avoid shell injection
-	const gitStdio = (silent ?? json) ? 'pipe' : 'inherit';
-	const cloneResult = spawnSync('git', ['clone', '--', repoUrl, cloneDir], {
-		stdio: ['ignore', gitStdio, gitStdio],
-	});
-
-	if (cloneResult.status !== 0) {
-		const result: SkillsInstallResult = {
-			...base,
-			cloned: false,
-			hasSkillsDir: false,
-			links: [],
-			error: `Failed to clone ${repoUrl}`,
-		};
-		emit(options, result, () => {
-			console.error(`Error: ${result.error}`);
-		});
-		return result;
-	}
-
-	const skillsDir = path.join(cloneDir, 'skills');
-	if (!fs.existsSync(skillsDir)) {
-		const result: SkillsInstallResult = {
-			...base,
-			cloned: true,
-			hasSkillsDir: false,
-			links: [],
-		};
-		emit(options, result, () => {
-			console.log(
-				`Cloned ${repoName} but no skills/ directory found — nothing to link.`,
-			);
-		});
-		return result;
-	}
-
-	const claudeSkillsDir = getClaudeSkillsDir();
-	fs.mkdirSync(claudeSkillsDir, {recursive: true});
-
-	const entries = fs.readdirSync(skillsDir);
+export function linkSkillEntries(
+	skillsDir: string,
+	targetDir: string,
+): SkillLinkResult[] {
+	fs.mkdirSync(targetDir, {recursive: true});
 	const links: SkillLinkResult[] = [];
 
-	for (const entry of entries) {
-		const target = path.join(claudeSkillsDir, entry);
+	for (const entry of fs.readdirSync(skillsDir)) {
+		const target = path.join(targetDir, entry);
 		const source = path.join(skillsDir, entry);
 
 		// Use lstatSync to detect broken symlinks; existsSync returns false for them
@@ -159,21 +71,135 @@ export function runSkillsInstall(options: {
 		}
 	}
 
+	return links;
+}
+
+function emit(
+	options: {silent?: boolean; json?: boolean},
+	result: SkillsInstallResult,
+	plainText: () => void,
+) {
+	if (options.json) {
+		console.log(JSON.stringify(result, null, 2));
+	} else if (!options.silent) {
+		plainText();
+	}
+}
+
+export function runSkillsInstall(options: {
+	repoUrl: string;
+	silent?: boolean;
+	json?: boolean;
+}): SkillsInstallResult {
+	const {repoUrl, silent, json} = options;
+	const repoName = repoNameFromUrl(repoUrl);
+	const agentSkillsDir = getAgentSkillsDir();
+	const cloneDir = path.join(agentSkillsDir, repoName);
+
+	const base: Omit<
+		SkillsInstallResult,
+		'cloned' | 'hasSkillsDir' | 'links' | 'agentLinks'
+	> = {
+		repoUrl,
+		repoName,
+		cloneDir,
+	};
+
+	if (!repoName) {
+		const result: SkillsInstallResult = {
+			...base,
+			cloned: false,
+			hasSkillsDir: false,
+			links: [],
+			agentLinks: [],
+			error: `Cannot parse repo name from URL: ${repoUrl}`,
+		};
+		emit(options, result, () => {
+			console.error(`Error: ${result.error}`);
+		});
+		return result;
+	}
+
+	if (fs.existsSync(cloneDir)) {
+		const result: SkillsInstallResult = {
+			...base,
+			cloned: false,
+			hasSkillsDir: false,
+			links: [],
+			agentLinks: [],
+			error: `${repoName} is already installed at ${cloneDir}`,
+		};
+		emit(options, result, () => {
+			console.error(`Error: ${result.error}`);
+		});
+		return result;
+	}
+
+	fs.mkdirSync(agentSkillsDir, {recursive: true});
+
+	// Use spawnSync with an args array to avoid shell injection
+	const gitStdio = (silent ?? json) ? 'pipe' : 'inherit';
+	const cloneResult = spawnSync('git', ['clone', '--', repoUrl, cloneDir], {
+		stdio: ['ignore', gitStdio, gitStdio],
+	});
+
+	if (cloneResult.status !== 0) {
+		const result: SkillsInstallResult = {
+			...base,
+			cloned: false,
+			hasSkillsDir: false,
+			links: [],
+			agentLinks: [],
+			error: `Failed to clone ${repoUrl}`,
+		};
+		emit(options, result, () => {
+			console.error(`Error: ${result.error}`);
+		});
+		return result;
+	}
+
+	const skillsDir = path.join(cloneDir, 'skills');
+	if (!fs.existsSync(skillsDir)) {
+		const result: SkillsInstallResult = {
+			...base,
+			cloned: true,
+			hasSkillsDir: false,
+			links: [],
+			agentLinks: [],
+		};
+		emit(options, result, () => {
+			console.log(
+				`Cloned ${repoName} but no skills/ directory found — nothing to link.`,
+			);
+		});
+		return result;
+	}
+
+	const links = linkSkillEntries(skillsDir, getClaudeSkillsDir());
+	const agentLinks = linkSkillEntries(skillsDir, getAgentsSkillsDir());
+
 	const result: SkillsInstallResult = {
 		...base,
 		cloned: true,
 		hasSkillsDir: true,
 		links,
+		agentLinks,
 	};
 
 	emit(options, result, () => {
-		for (const link of links) {
-			if (link.status === 'linked') {
-				console.log(`  linked: ${link.name}`);
-			} else {
-				console.warn(`  skipped: ${link.name} (${link.reason})`);
+		const printLinks = (label: string, entries: SkillLinkResult[]) => {
+			console.log(label);
+			for (const link of entries) {
+				if (link.status === 'linked') {
+					console.log(`  linked: ${link.name}`);
+				} else {
+					console.warn(`  skipped: ${link.name} (${link.reason})`);
+				}
 			}
-		}
+		};
+
+		printLinks('~/.claude/skills/', links);
+		printLinks('~/.agents/skills/', agentLinks);
 	});
 
 	return result;
