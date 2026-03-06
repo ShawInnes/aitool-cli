@@ -28,3 +28,8 @@ After completing any implementation, create a git commit automatically:
 - Stage all relevant modified/new files
 - Message pattern: `type: short description` (e.g. `feat: add agent configure command`)
 - Do not wait to be asked — commit as the final step of every task
+
+## Decisions
+
+**Skills git operations use `spawnSync`, not isomorphic-git.**
+`skillsInstall.ts` and `skillsUpdate.ts` use `spawnSync('git', [...])`. This is intentional — do not replace with isomorphic-git. Reasons: isomorphic-git has no SSH transport (SSH clone URLs break), `pull` requires knowing the branch name upfront, it adds ~500KB to the bundle, and system git picks up SSH keys/credential helpers automatically. This CLI targets developers where git is always present.
