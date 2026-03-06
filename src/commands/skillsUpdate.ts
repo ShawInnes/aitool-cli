@@ -90,8 +90,7 @@ function updateRepo(
 	const skillsDir = path.join(cloneDir, 'skills');
 	let skillsDirExists = false;
 	try {
-		fs.lstatSync(skillsDir);
-		skillsDirExists = true;
+		skillsDirExists = fs.lstatSync(skillsDir).isDirectory();
 	} catch {}
 
 	if (!skillsDirExists) {
