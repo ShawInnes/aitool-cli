@@ -113,7 +113,7 @@ export function runSkillsUpdate(options: {
 		return [];
 	}
 
-	const gitStdio = (silent ?? json) ? 'pipe' : 'inherit';
+	const gitStdio = (silent || json) ? 'pipe' : 'inherit';
 	const results: SkillsUpdateRepoResult[] = [];
 
 	for (const repoName of repoDirs) {
