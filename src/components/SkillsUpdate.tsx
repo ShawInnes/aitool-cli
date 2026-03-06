@@ -41,6 +41,23 @@ function LinkRow({link}: {readonly link: SkillLinkResult}) {
 	);
 }
 
+function LinkGroup({
+	label,
+	links,
+}: {
+	readonly label: string;
+	readonly links: SkillLinkResult[];
+}) {
+	return (
+		<Box flexDirection="column">
+			<Text color="gray">{label}</Text>
+			{links.map(link => (
+				<LinkRow key={link.name} link={link} />
+			))}
+		</Box>
+	);
+}
+
 function RepoBlock({result}: {readonly result: SkillsUpdateRepoResult}) {
 	return (
 		<Box flexDirection="column">
@@ -49,19 +66,12 @@ function RepoBlock({result}: {readonly result: SkillsUpdateRepoResult}) {
 			) : (
 				<>
 					<StepRow isOk={result.pulled} label={`pulled ${result.repoName}`} />
-					{result.pulled ? (
-						<StepRow
-							isOk={result.hasSkillsDir}
-							label={
-								result.hasSkillsDir
-									? 'found skills/ directory'
-									: 'no skills/ directory — nothing linked'
-							}
-						/>
+					{result.pulled && result.hasSkillsDir ? (
+						<>
+							<LinkGroup label="~/.claude/skills/" links={result.links} />
+							<LinkGroup label="~/.agents/skills/" links={result.agentLinks} />
+						</>
 					) : null}
-					{result.links.map(link => (
-						<LinkRow key={link.name} link={link} />
-					))}
 				</>
 			)}
 		</Box>

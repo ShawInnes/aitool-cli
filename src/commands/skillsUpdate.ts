@@ -1,52 +1,21 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {getAgentSkillsDir, getClaudeSkillsDir} from '../config/paths.js';
-import {type SkillLinkResult} from './skillsInstall.js';
+import {
+	getAgentSkillsDir,
+	getClaudeSkillsDir,
+	getAgentsSkillsDir,
+} from '../config/paths.js';
+import {type SkillLinkResult, linkSkillEntries} from './skillsInstall.js';
 
 export type SkillsUpdateRepoResult = {
 	repoName: string;
 	pulled: boolean;
 	hasSkillsDir: boolean;
 	links: SkillLinkResult[];
+	agentLinks: SkillLinkResult[];
 	error?: string;
 };
-
-function linkMissingSkills(skillsDir: string): SkillLinkResult[] {
-	const claudeSkillsDir = getClaudeSkillsDir();
-	fs.mkdirSync(claudeSkillsDir, {recursive: true});
-
-	const links: SkillLinkResult[] = [];
-	for (const entry of fs.readdirSync(skillsDir)) {
-		const target = path.join(claudeSkillsDir, entry);
-		const source = path.join(skillsDir, entry);
-
-		// Use lstatSync to detect broken symlinks; existsSync returns false for them
-		let targetExists = false;
-		try {
-			fs.lstatSync(target);
-			targetExists = true;
-		} catch {}
-
-		if (targetExists) {
-			links.push({name: entry, status: 'skipped', reason: 'already exists'});
-			continue;
-		}
-
-		try {
-			fs.symlinkSync(source, target);
-			links.push({name: entry, status: 'linked'});
-		} catch (error) {
-			links.push({
-				name: entry,
-				status: 'skipped',
-				reason: error instanceof Error ? error.message : String(error),
-			});
-		}
-	}
-
-	return links;
-}
 
 function printResult(result: SkillsUpdateRepoResult): void {
 	if (result.error) {
@@ -55,12 +24,20 @@ function printResult(result: SkillsUpdateRepoResult): void {
 	}
 
 	console.log(`  pulled: ${result.repoName}`);
-	for (const link of result.links) {
-		if (link.status === 'linked') {
-			console.log(`    linked: ${link.name}`);
-		} else {
-			console.warn(`    skipped: ${link.name} (${link.reason})`);
-		}
+	if (result.hasSkillsDir) {
+		const printLinks = (label: string, entries: SkillLinkResult[]) => {
+			console.log(`  ${label}`);
+			for (const link of entries) {
+				if (link.status === 'linked') {
+					console.log(`    linked: ${link.name}`);
+				} else {
+					console.warn(`    skipped: ${link.name} (${link.reason})`);
+				}
+			}
+		};
+
+		printLinks('~/.claude/skills/', result.links);
+		printLinks('~/.agents/skills/', result.agentLinks);
 	}
 }
 
@@ -83,6 +60,7 @@ function updateRepo(
 			pulled: false,
 			hasSkillsDir: false,
 			links: [],
+			agentLinks: [],
 			error: `Failed to pull ${repoName}: ${reason}`,
 		};
 	}
@@ -94,11 +72,18 @@ function updateRepo(
 	} catch {}
 
 	if (!skillsDirExists) {
-		return {repoName, pulled: true, hasSkillsDir: false, links: []};
+		return {
+			repoName,
+			pulled: true,
+			hasSkillsDir: false,
+			links: [],
+			agentLinks: [],
+		};
 	}
 
-	const links = linkMissingSkills(skillsDir);
-	return {repoName, pulled: true, hasSkillsDir: true, links};
+	const links = linkSkillEntries(skillsDir, getClaudeSkillsDir());
+	const agentLinks = linkSkillEntries(skillsDir, getAgentsSkillsDir());
+	return {repoName, pulled: true, hasSkillsDir: true, links, agentLinks};
 }
 
 export function runSkillsUpdate(options: {
