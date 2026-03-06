@@ -156,7 +156,7 @@ export async function selfUpdate(): Promise<void> {
 		console.log(`\nDownloaded new binary to: ${dest}`);
 		console.log(
 			`To complete the update, replace the current binary:\n` +
-				`  move /Y "${dest}" "${process.execPath}"`,
+				`  Move-Item -Force "${dest}" "${process.execPath}"`,
 		);
 		return;
 	}
