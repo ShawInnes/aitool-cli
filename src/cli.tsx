@@ -41,6 +41,22 @@ type GlobalOptions = {
 	verbose: boolean;
 };
 
+type CommandMeta = {
+	requiresToken?: boolean;
+};
+
+const commandMeta = new WeakMap<Command, CommandMeta>();
+
+function defineCommand(
+	parent: Command,
+	name: string,
+	meta: CommandMeta = {},
+): Command {
+	const cmd = parent.command(name);
+	commandMeta.set(cmd, meta);
+	return cmd;
+}
+
 function isTuiMode(globalOptions: GlobalOptions): boolean {
 	return globalOptions.tui && process.stdout.isTTY;
 }
@@ -499,11 +515,8 @@ skillsCommand
 	});
 
 program.hook('preAction', (_thisCommand, actionCommand) => {
-	// Skip warning for auth sub-commands — user is already acting on auth
-	const commandPath: string[] = [];
 	let cmd = actionCommand;
 	while (cmd.parent) {
-		commandPath.unshift(cmd.name());
 		cmd = cmd.parent;
 	}
 
@@ -512,9 +525,9 @@ program.hook('preAction', (_thisCommand, actionCommand) => {
 		process.env['AITOOL_VERBOSE'] = '1';
 	}
 
-	const {configDir} = rootOptions;
-	if (commandPath[0] === 'auth') return;
-	warnIfTokenExpiring(configDir);
+	if (commandMeta.get(actionCommand)?.requiresToken) {
+		warnIfTokenExpiring(rootOptions.configDir);
+	}
 });
 
 try {
