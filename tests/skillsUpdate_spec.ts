@@ -1,6 +1,6 @@
 // tests/skillsUpdate_spec.ts
 import {describe, expect, test, beforeEach, afterEach} from 'bun:test';
-import {mkdtempSync, rmSync, mkdirSync, writeFileSync, symlinkSync} from 'node:fs';
+import {mkdtempSync, rmSync, mkdirSync, writeFileSync, symlinkSync, lstatSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawnSync} from 'node:child_process';
@@ -62,8 +62,8 @@ function setupGitRepo(tmpDir: string): string {
 	spawnSync('git', ['config', 'user.name', 'Test'], {cwd: cloneDir});
 
 	const skillsDir = join(cloneDir, 'skills');
-	mkdirSync(skillsDir);
-	writeFileSync(join(skillsDir, 'my-skill.md'), 'hello');
+	mkdirSync(join(skillsDir, 'my-skill'), {recursive: true});
+	writeFileSync(join(skillsDir, 'my-skill', 'SKILL.md'), '---\nname: my-skill\n---\nhello');
 
 	spawnSync('git', ['add', '.'], {cwd: cloneDir});
 	spawnSync('git', ['commit', '-m', 'init'], {cwd: cloneDir});
@@ -73,25 +73,43 @@ function setupGitRepo(tmpDir: string): string {
 }
 
 describe('runSkillsUpdate — success path', () => {
-	test('links new skills from a valid git repo', () => {
+	test('links new skills to ~/.claude/skills/ and ~/.agents/skills/', () => {
 		setupGitRepo(tmpDir);
 		const results = runSkillsUpdate({silent: true});
 		expect(results).toHaveLength(1);
 		expect(results[0]!.pulled).toBe(true);
 		expect(results[0]!.hasSkillsDir).toBe(true);
+
 		expect(results[0]!.links).toHaveLength(1);
-		expect(results[0]!.links[0]).toMatchObject({name: 'my-skill.md', status: 'linked'});
+		expect(results[0]!.links[0]).toMatchObject({name: 'my-skill', status: 'linked'});
+		expect(lstatSync(join(tmpDir, '.claude', 'skills', 'my-skill')).isSymbolicLink()).toBe(true);
+
+		expect(results[0]!.agentLinks).toHaveLength(1);
+		expect(results[0]!.agentLinks[0]).toMatchObject({name: 'my-skill', status: 'linked'});
+		expect(lstatSync(join(tmpDir, '.agents', 'skills', 'my-skill')).isSymbolicLink()).toBe(true);
 	});
 
-	test('skips already-linked skills', () => {
+	test('skips already-linked skills in ~/.claude/skills/', () => {
 		const cloneDir = setupGitRepo(tmpDir);
 		const claudeSkillsDir = join(tmpDir, '.claude', 'skills');
 		mkdirSync(claudeSkillsDir, {recursive: true});
 		symlinkSync(
-			join(cloneDir, 'skills', 'my-skill.md'),
-			join(claudeSkillsDir, 'my-skill.md'),
+			join(cloneDir, 'skills', 'my-skill'),
+			join(claudeSkillsDir, 'my-skill'),
 		);
 		const results = runSkillsUpdate({silent: true});
-		expect(results[0]!.links[0]).toMatchObject({name: 'my-skill.md', status: 'skipped'});
+		expect(results[0]!.links[0]).toMatchObject({name: 'my-skill', status: 'skipped'});
+	});
+
+	test('skips already-linked skills in ~/.agents/skills/', () => {
+		const cloneDir = setupGitRepo(tmpDir);
+		const agentsSkillsDir = join(tmpDir, '.agents', 'skills');
+		mkdirSync(agentsSkillsDir, {recursive: true});
+		symlinkSync(
+			join(cloneDir, 'skills', 'my-skill'),
+			join(agentsSkillsDir, 'my-skill'),
+		);
+		const results = runSkillsUpdate({silent: true});
+		expect(results[0]!.agentLinks[0]).toMatchObject({name: 'my-skill', status: 'skipped'});
 	});
 });

@@ -43,6 +43,23 @@ function LinkRow({link}: {readonly link: SkillLinkResult}) {
 	);
 }
 
+function LinkGroup({
+	label,
+	links,
+}: {
+	readonly label: string;
+	readonly links: SkillLinkResult[];
+}) {
+	return (
+		<Box flexDirection="column">
+			<Text color="gray">{label}</Text>
+			{links.map(link => (
+				<LinkRow key={link.name} link={link} />
+			))}
+		</Box>
+	);
+}
+
 export default function SkillsInstall({result}: Props) {
 	const {exit} = useApp();
 
@@ -70,18 +87,26 @@ export default function SkillsInstall({result}: Props) {
 					<>
 						<StepRow isOk={result.cloned} label={`cloned ${result.repoName}`} />
 						{result.cloned ? (
-							<StepRow
-								isOk={result.hasSkillsDir}
-								label={
-									result.hasSkillsDir
-										? 'found skills/ directory'
-										: 'no skills/ directory — nothing linked'
-								}
-							/>
+							<>
+								<StepRow
+									isOk={result.hasSkillsDir}
+									label={
+										result.hasSkillsDir
+											? 'found skills/ directory'
+											: 'no skills/ directory — nothing linked'
+									}
+								/>
+								{result.hasSkillsDir ? (
+									<>
+										<LinkGroup label="~/.claude/skills/" links={result.links} />
+										<LinkGroup
+											label="~/.agents/skills/"
+											links={result.agentLinks}
+										/>
+									</>
+								) : null}
+							</>
 						) : null}
-						{result.links.map(link => (
-							<LinkRow key={link.name} link={link} />
-						))}
 					</>
 				)}
 			</Box>

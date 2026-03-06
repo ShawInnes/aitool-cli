@@ -52,3 +52,7 @@ export function getAgentSkillsDir(): string {
 export function getClaudeSkillsDir(): string {
 	return path.join(homeDir(), '.claude', 'skills');
 }
+
+export function getAgentsSkillsDir(): string {
+	return path.join(homeDir(), '.agents', 'skills');
+}
