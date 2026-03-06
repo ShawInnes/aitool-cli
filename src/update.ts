@@ -132,6 +132,8 @@ export async function selfUpdate(): Promise<void> {
 	const {archive, binary} = getPlatformAssets();
 	const url = `https://github.com/${REPO}/releases/download/v${latest}/${archive}`;
 
+	console.log(`Downloading ${url}`);
+
 	const response = await fetch(url, {headers: {'User-Agent': BINARY_NAME}});
 	if (!response.ok) throw new Error(`Download failed: ${response.status}`);
 
