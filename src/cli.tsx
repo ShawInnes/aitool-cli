@@ -32,6 +32,8 @@ import AuthLogin from './components/AuthLogin.js';
 import AuthStatus from './components/AuthStatus.js';
 import AuthUserinfo from './components/AuthUserinfo.js';
 import SkillsInstall from './components/SkillsInstall.js';
+import {runSkillsUpdate} from './commands/skillsUpdate.js';
+import SkillsUpdate from './components/SkillsUpdate.js';
 
 type GlobalOptions = {
 	configDir?: string;
@@ -477,6 +479,29 @@ skillsCommand
 
 		if (tui) {
 			const {waitUntilExit} = render(<SkillsInstall result={result} />);
+			await waitUntilExit();
+		}
+	});
+
+skillsCommand
+	.command('update')
+	.description(
+		'Pull the latest changes for all installed skills repos and link any new skills',
+	)
+	.option('--json', 'output results as JSON')
+	.action(async (options: {json?: boolean}) => {
+		const globalOptions = (
+			skillsCommand.parent as typeof program
+		).opts<GlobalOptions>();
+		const tui = !options.json && isTuiMode(globalOptions);
+
+		const results = runSkillsUpdate({
+			json: options.json,
+			silent: tui,
+		});
+
+		if (tui) {
+			const {waitUntilExit} = render(<SkillsUpdate results={results} />);
 			await waitUntilExit();
 		}
 	});
