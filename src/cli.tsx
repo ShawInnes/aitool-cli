@@ -232,8 +232,7 @@ authCommand
 		}
 	});
 
-authCommand
-	.command('status')
+defineCommand(authCommand, 'status', {requiresToken: true})
 	.description('Show current authentication status and token expiry')
 	.option('--output <format>', 'output format: text or json', 'text')
 	.action((options: {output: string}, command: Command) => {
@@ -276,8 +275,7 @@ authCommand
 		if (status.scope) console.log(`scope:         ${status.scope}`);
 	});
 
-authCommand
-	.command('whoami')
+defineCommand(authCommand, 'whoami', {requiresToken: true})
 	.description(
 		'Fetch user profile from the identity provider userinfo endpoint',
 	)
