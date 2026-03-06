@@ -75,17 +75,26 @@ function updateRepo(
 	});
 
 	if (pullResult.status !== 0) {
+		const reason =
+			pullResult.error?.message ??
+			`exited with status ${String(pullResult.status)}`;
 		return {
 			repoName,
 			pulled: false,
 			hasSkillsDir: false,
 			links: [],
-			error: `Failed to pull ${repoName}`,
+			error: `Failed to pull ${repoName}: ${reason}`,
 		};
 	}
 
 	const skillsDir = path.join(cloneDir, 'skills');
-	if (!fs.existsSync(skillsDir)) {
+	let skillsDirExists = false;
+	try {
+		fs.lstatSync(skillsDir);
+		skillsDirExists = true;
+	} catch {}
+
+	if (!skillsDirExists) {
 		return {repoName, pulled: true, hasSkillsDir: false, links: []};
 	}
 
@@ -100,7 +109,13 @@ export function runSkillsUpdate(options: {
 	const {silent, json} = options;
 	const agentSkillsDir = getAgentSkillsDir();
 
-	if (!fs.existsSync(agentSkillsDir)) {
+	let agentSkillsDirExists = false;
+	try {
+		fs.lstatSync(agentSkillsDir);
+		agentSkillsDirExists = true;
+	} catch {}
+
+	if (!agentSkillsDirExists) {
 		return [];
 	}
 
@@ -113,7 +128,7 @@ export function runSkillsUpdate(options: {
 		return [];
 	}
 
-	const gitStdio = (silent || json) ? 'pipe' : 'inherit';
+	const gitStdio = (silent ?? false) || (json ?? false) ? 'pipe' : 'inherit';
 	const results: SkillsUpdateRepoResult[] = [];
 
 	for (const repoName of repoDirs) {
