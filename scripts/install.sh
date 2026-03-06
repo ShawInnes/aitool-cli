@@ -4,7 +4,7 @@ set -euo pipefail
 
 REPO="ShawInnes/aitool-cli"
 BINARY_NAME="aitool"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="${INSTALL_DIR:-${HOME}/.local/bin}"
 
 # ── Platform detection ────────────────────────────────────────────────────────
 
@@ -92,6 +92,8 @@ fi
 tar xzf "${TMP_DIR}/${ARCHIVE_NAME}" -C "$TMP_DIR"
 chmod +x "${TMP_DIR}/${ASSET_NAME}"
 
+mkdir -p "$INSTALL_DIR"
+
 if [ -w "$INSTALL_DIR" ]; then
   mv "${TMP_DIR}/${ASSET_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
 else
@@ -102,3 +104,17 @@ fi
 echo ""
 echo "Installed ${BINARY_NAME} ${LATEST} → ${INSTALL_DIR}/${BINARY_NAME}"
 echo "Run '${BINARY_NAME} --help' to get started."
+
+# ── PATH check ────────────────────────────────────────────────────────────────
+
+case ":${PATH}:" in
+  *":${INSTALL_DIR}:"*) ;;
+  *)
+    echo ""
+    echo "⚠ Setup notes:"
+    echo "  • ${INSTALL_DIR} is not in your PATH. Run:"
+    echo ""
+    echo "  echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc && source ~/.zshrc"
+    echo ""
+    ;;
+esac
