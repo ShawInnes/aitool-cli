@@ -110,11 +110,20 @@ echo "Run '${BINARY_NAME} --help' to get started."
 case ":${PATH}:" in
   *":${INSTALL_DIR}:"*) ;;
   *)
+    # Determine the user's shell rc file from $SHELL (login shell, not the
+    # currently-running bash invocation).
+    case "${SHELL:-}" in
+      */zsh)  PATH_CMD="echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc && source ~/.zshrc" ;;
+      */bash) PATH_CMD="echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc && source ~/.bashrc" ;;
+      */fish) PATH_CMD="fish_add_path \$HOME/.local/bin" ;;
+      *)      PATH_CMD="echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.profile && . ~/.profile" ;;
+    esac
+
     echo ""
     echo "⚠ Setup notes:"
     echo "  • ${INSTALL_DIR} is not in your PATH. Run:"
     echo ""
-    echo "  echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc && source ~/.zshrc"
+    echo "  ${PATH_CMD}"
     echo ""
     ;;
 esac
