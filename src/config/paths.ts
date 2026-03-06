@@ -40,3 +40,11 @@ export function getConfigFilePath(configDir?: string): string {
 export function getCredentialsFilePath(configDir?: string): string {
 	return path.join(configDir ?? getConfigDir(), 'credentials.json');
 }
+
+export function getAgentSkillsDir(): string {
+	return path.join(os.homedir(), '.agent-skills');
+}
+
+export function getClaudeSkillsDir(): string {
+	return path.join(os.homedir(), '.claude', 'skills');
+}

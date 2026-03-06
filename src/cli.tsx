@@ -21,6 +21,7 @@ import {runAgentConfigure, applyPatch} from './commands/agentConfigure.js';
 import {unifiedDiff, colorizeDiff} from './commands/unifiedDiff.js';
 import {runAgentInstall} from './commands/agentInstall.js';
 import {runAgentList} from './commands/agentList.js';
+import {runSkillsInstall} from './commands/skillsInstall.js';
 import {AGENT_REGISTRY} from './agents/index.js';
 import AgentCheck from './components/AgentCheck.js';
 import AgentInstall from './components/AgentInstall.js';
@@ -30,6 +31,7 @@ import SetupWizard from './components/SetupWizard.js';
 import AuthLogin from './components/AuthLogin.js';
 import AuthStatus from './components/AuthStatus.js';
 import AuthUserinfo from './components/AuthUserinfo.js';
+import SkillsInstall from './components/SkillsInstall.js';
 
 type GlobalOptions = {
 	configDir?: string;
@@ -450,6 +452,34 @@ agentCommand
 			await waitUntilExit();
 		},
 	);
+
+const skillsCommand = program
+	.command('skills')
+	.description('Manage Claude agent skills');
+
+skillsCommand
+	.command('install <repo-url>')
+	.description(
+		'Clone a skills repo into ~/.agent-skills and symlink its skills/ entries into ~/.claude/skills/',
+	)
+	.option('--json', 'output result as JSON')
+	.action(async (repoUrl: string, options: {json?: boolean}) => {
+		const globalOptions = (
+			skillsCommand.parent as typeof program
+		).opts<GlobalOptions>();
+		const tui = !options.json && isTuiMode(globalOptions);
+
+		const result = runSkillsInstall({
+			repoUrl,
+			json: options.json,
+			silent: tui,
+		});
+
+		if (tui) {
+			const {waitUntilExit} = render(<SkillsInstall result={result} />);
+			await waitUntilExit();
+		}
+	});
 
 program.hook('preAction', (_thisCommand, actionCommand) => {
 	// Skip warning for auth sub-commands — user is already acting on auth
