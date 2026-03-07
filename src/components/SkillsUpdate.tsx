@@ -59,6 +59,9 @@ function LinkGroup({
 }
 
 function RepoBlock({result}: {readonly result: SkillsUpdateRepoResult}) {
+	const newLinks = result.links.filter(l => l.status === 'linked');
+	const newAgentLinks = result.agentLinks.filter(l => l.status === 'linked');
+
 	return (
 		<Box flexDirection="column">
 			{result.error ? (
@@ -66,11 +69,11 @@ function RepoBlock({result}: {readonly result: SkillsUpdateRepoResult}) {
 			) : (
 				<>
 					<StepRow isOk={result.pulled} label={`pulled ${result.repoName}`} />
-					{result.pulled && result.hasSkillsDir ? (
-						<>
-							<LinkGroup label="~/.claude/skills/" links={result.links} />
-							<LinkGroup label="~/.agents/skills/" links={result.agentLinks} />
-						</>
+					{result.pulled && newLinks.length > 0 ? (
+						<LinkGroup label="~/.claude/skills/" links={newLinks} />
+					) : null}
+					{result.pulled && newAgentLinks.length > 0 ? (
+						<LinkGroup label="~/.agents/skills/" links={newAgentLinks} />
 					) : null}
 				</>
 			)}

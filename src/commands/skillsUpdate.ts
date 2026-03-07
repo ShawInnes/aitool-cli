@@ -26,13 +26,11 @@ function printResult(result: SkillsUpdateRepoResult): void {
 	console.log(`  pulled: ${result.repoName}`);
 	if (result.hasSkillsDir) {
 		const printLinks = (label: string, entries: SkillLinkResult[]) => {
+			const newLinks = entries.filter(l => l.status === 'linked');
+			if (newLinks.length === 0) return;
 			console.log(`  ${label}`);
-			for (const link of entries) {
-				if (link.status === 'linked') {
-					console.log(`    linked: ${link.name}`);
-				} else {
-					console.warn(`    skipped: ${link.name} (${link.reason})`);
-				}
+			for (const link of newLinks) {
+				console.log(`    linked: ${link.name}`);
 			}
 		};
 
