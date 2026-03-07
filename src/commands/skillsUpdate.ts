@@ -46,11 +46,13 @@ function updateRepo(
 ): SkillsUpdateRepoResult {
 	const pullResult = spawnSync('git', ['pull'], {
 		cwd: cloneDir,
-		stdio: ['ignore', gitStdio, gitStdio],
+		stdio: ['ignore', gitStdio, 'pipe'],
 	});
 
 	if (pullResult.status !== 0) {
+		const stderr = pullResult.stderr?.toString().trim() || undefined;
 		const reason =
+			stderr ??
 			pullResult.error?.message ??
 			`exited with status ${String(pullResult.status)}`;
 		return {
